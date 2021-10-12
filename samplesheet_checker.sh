@@ -44,7 +44,8 @@ warning_message=${1}
 echo "$warning_message"
 # Raise a local warning notification for the user on the workstation
 notify-send -u critical "$warning_message"
-# Trigger a remote alert in Slack & save warning to local loglogger -s "$warning_message"
+# Trigger a remote alert in Slack by saving warning to system log which is monitored by InterOps. 
+logger -s "$warning_message"
 }
 
 ############### Run Program ###############
@@ -81,7 +82,7 @@ inotifywait -d "$runfolder_to_watch" -e create -e moved_to |
         # Check that the file is not empty:
         if [[ ! -s $absolute_file_path ]];
         then
-            raise_warning "$file_name, is an empty file";
+            raise_warning "SAMPLESHEET ERROR: $file_name, is an empty file";
         else
             echo "$file_name contains data";
             # Run further checks on the formatting of the data
