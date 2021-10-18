@@ -24,7 +24,7 @@ bash samplesheet_checker.sh -r /home/mokaguys/runfolders -s /home/mokaguys/runfo
 
 ### 
 
-This script runs as a daemon in the background, monitoring a directory for Illumina Runfolders.  When a new runfolder is detected it looks in the SampleSheet folder for a matching samplesheet.  It parses the file name and contents and uses a regex to compare against expected patterns.  If an error is detected (which will likely cause an error in the pipeline, delaying results) an optional notification can be sent to the monitor using libnotify and a warning is sent to the Syslog using logger, which is setup to fire a warning to the Bioinformatics team via a Slack channel (Functionality provided by Rapid7 InterOps).
+This script runs as a daemon in the background, monitoring a directory for Illumina Runfolders.  When a new runfolder is detected it looks in the SampleSheet folder for a matching samplesheet.  It parses the file name and contents and uses a regex to compare against expected patterns.  If an error is detected (which will likely cause an error in the pipeline, delaying results) an optional notification can be sent to the monitor using libnotify and a warning is sent to the Syslog using logger, which is setup to fire a warning to the Bioinformatics team via a Slack channel (Functionality provided by Rapid7 InterOps).  All messages sent to the system log - /var/log/syslog - will be prefixed with 'SAMPLESHEET ERROR:'
 
 Writing to Syslog allows easier troubleshooting of the errors as well as allowing the extent of errors to be monitored.
 

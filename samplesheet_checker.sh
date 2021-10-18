@@ -2,11 +2,11 @@
 
 # Required packages:
 # sudo apt-get install inotify-tools
-# sudo apt-get install libnotify-bin
+# sudo apt-get --reinstall install libnotify-bin notify-osd
 
 # Get path from command line
 
-# "/home/graeme/Desktop/Test_name_checker/"
+# sudo bash '/home/graeme/Desktop/samplesheet_verifier/samplesheet_checker.sh' -r '/home/graeme/Desktop/Test_name_checker/runfolder' -s '/home/graeme/Desktop/Test_name_checker/samplesheets'
 
 # TODO Make libnotify optional as nobody will be observing the workstation during sequencing run
 
@@ -21,7 +21,7 @@ while getopts ":r:s:" opt; do
         samplesheet_folder=$OPTARG
         echo $samplesheet_folder
       ;;
-    \? ) echo "Usage: samplesheet_checker.sh [-r] [-s] [-l]"
+    \? ) echo "Usage: samplesheet_checker.sh [-r] [-s]"
          echo "-r Folder holding the Runfolder directories"
          echo "-s Folder holding the SampleSheets for each run"
          echo "bash samplesheet_checker.sh -r /home/mokaguys/runfolders -s /home/mokaguys/runfolders/samplesheets"
@@ -53,7 +53,7 @@ logger -s "$warning_message"
 # TODO: Consider placing filter to only run main tests on csv files - should through a limited if non-CSV file detected
 # ()
 
-inotifywait -d "$runfolder_to_watch" -e create -e moved_to |
+inotifywait -q -m "$runfolder_to_watch" -e create -e moved_to |
     while IFS= read -r file; do
         echo "Change detected:" # Useful when debugging to know that script is running
         # Parse filename
