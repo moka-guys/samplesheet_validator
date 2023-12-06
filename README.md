@@ -1,33 +1,93 @@
-# samplesheet_verifier
+# Samplesheet Validator
 
-This script is designed to run on a linux system and monitors a directory for changes.  If a Illumina Runfolder is saved to the directory the script checkes for a matching Illumina Runsheet parsing the file name and contents - upon finding any issues with the format which will cause problems with our pipeline it:
-* Notifys the local user that there is an issue with the SampleSheet which will delay the run, giving them a chance to rectify the issues (Optional).
-* Gives early warning to the Bioinformatics team via the moka-alerts slack channel.
-* Writes the Error Message to the systemlog so that such errors are tracked, allowing appropriate training to directed to lab staff as needed.
-This script should be reviewed and expanded every time their is an issue with a sample sheet which reachs the pipeline.  By taking a "No broken windows" approach we can use this script as part of a process to help prevent delays due to incorrect samplesheets.
+Checks sample sheet naming and contents. Carries out a series of checks on the sample sheet and collects any errors 
+that it identifies (SamplesheetCheck.errors_list). It also identifies whether or not a run is a TSO run from the sample 
+sheet (SamplesheetCheck.tso).
 
-## Requirements
-* bash environment
-* inotify-tools
-* libnotify-bin (Optional)
+## Protocol
 
-## How does samplesheet_verifier work
-###  Inputs
-* A directory where Illumina Runfolders are saved
-* A directory where Illumina formatted SampleSheets are saved
+Runs a series of checks on the sample sheet, collects any errors identified. Checks whether: 
+* Sample sheet exists
+* Samplesheet name is valid (validates using the [seglh-naming](https://github.com/moka-guys/seglh-naming/) library)
+* Sequencer ID is in the list of allowed sequencer IDs supplied to the script
+* Samplesheet is not empty (>10 bytes)
+* Samplesheet is for a development run, using the development pan number supplied to the script
+* Samplesheet contains the minimum expected `[Data]` section headers: `Sample_ID, Sample_Name, index`
+* `Sample_ID` and `Sample_Name` match for each sample in the data section of the samplesheet
+* Sample name does not contain any illegal characters
+* Sample name is valid (validates using the [seglh-naming](https://github.com/moka-guys/seglh-naming/) library)
+* Pan numbers are in the list of allowed pan numbers supplied to the script
+* Library prep name in the sample name is in the list of allowed library prep names supplied to the script
+* Samplesheet contains any TSO samples
 
-### Usage
+## Usage
 
-bash samplesheet_checker.sh -r /home/mokaguys/runfolders -s /home/mokaguys/runfolders/samplesheets
+### Python package
 
-(This script runs as a daemon in the background and the command would typically be set to run periodically by a chron job.) TODO: Check how to terminate inotify before restarting
+The repository provides a python package which can be installed with:
 
-### 
+`python3 setup.py install`
 
-This script runs as a daemon in the background, monitoring a directory for Illumina Runfolders.  When a new runfolder is detected it looks in the SampleSheet folder for a matching samplesheet.  It parses the file name and contents and uses a regex to compare against expected patterns.  If an error is detected (which will likely cause an error in the pipeline, delaying results) an optional notification can be sent to the monitor using libnotify and a warning is sent to the Syslog using logger, which is setup to fire a warning to the Bioinformatics team via a Slack channel (Functionality provided by Rapid7 InterOps).  All messages sent to the system log - /var/log/syslog - will be prefixed with 'SAMPLESHEET ERROR:'
+NB: Use the --user flag or install into an virtualenv/pipenv if not installing globally.
 
-Writing to Syslog allows easier troubleshooting of the errors as well as allowing the extent of errors to be monitored.
+```python
 
-###
+from samplesheet_validator import samplesheet_validator
 
-NOTE: If a badly formatted sampleSheet is not detected by this script please raise an issue in this repo and provide the Bioinformatics team with the incorrectly formatted CSV file so that this script can be improved.
+logger = SSLogger(logfile_path)
+
+sscheck_obj = samplesheet_validator.SamplesheetCheck(
+    samplesheet_path,  # str
+    sequencer_ids,  # list
+    panels,  # list
+    library_prep_names,  # list
+    tso_panels,  # list
+    dev_panno,  # str
+    logdir,  # str
+)
+sscheck_obj.ss_checks()  # Carry out samplesheeet validation
+sscheck_obj.log_summary()  # Log a summary of the validation
+
+print(sscheck_obj.errors_dict)  # View the dictionary of error messages
+```
+
+### Command line
+
+```bash
+usage: Used to validate a samplesheet using the seglh-naming conventions
+
+Given an input samplesheet, will validate the samplesheet using seglh-naming conventions and output a logfile
+
+options:
+  -h, --help            show this help message and exit
+  -S SAMPLESHEET_PATH, --samplesheet_path SAMPLESHEET_PATH
+                        Path to samplesheet requiring validation
+  -SI SEQUENCER_IDS, --sequencer_ids SEQUENCER_IDS
+                        Comma separated string of allowed sequencer IDS
+  -P PANELS, --panels PANELS
+                        Comma separated string of allowed panel numbers
+  -R LIBRARY_PREP_NAMES, --library_prep_names LIBRARY_PREP_NAMES
+                        Comma separated string of allowed library prep names
+  -T TSO_PANELS, --tso_panels TSO_PANELS
+                        Comma separated string of tso panels
+  -D DEV_PANNO, --dev_panno DEV_PANNO
+                        Development pan number
+  -L LOGDIR, --logdir LOGDIR
+                        Directory to save the output logfile to
+```
+
+## Logging
+
+Logging is performed by [ss_logger](samplesheet_validator/ss_logger.py). The directory to save the log file to is supplied as an argument. The output log file is named by the script as follows:
+- `$LOGFILE_DIR/$RUNFOLDER_NAME_$TIMESTAMP_samplesheet_validator.log`
+
+The script also collects the error messages as it runs, which can be used by other scripts when this script is used as an import.
+
+## Testing
+
+**N.B. Tests and test cases/files MUST be maintained and updated accordingly in conjunction with script development**
+
+Test datasets are stored in [/test/data](../test/data). The script has a full test suite:
+* [test_samplesheet_validator.py](../test/test_samplesheet_validator.py)
+
+These tests should be run before pushing any code to ensure all tests in the GitHub Actions workflow pass.
