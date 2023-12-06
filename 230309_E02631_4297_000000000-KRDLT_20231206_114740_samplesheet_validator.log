@@ -1,5 +1,0 @@
-2023-12-06 11:47:40,985 - SAMPLESHEET_VALIDATOR - INFO - Samplesheet with supplied name is present (/home/rachel/projects/samplesheet_validator/test/data/samplesheets/invalid/230309_E02631_4297_000000000-KRDLT_SampleSheet.csv)
-2023-12-06 11:47:40,986 - SAMPLESHEET_VALIDATOR - INFO - Samplesheet name is valid (/home/rachel/projects/samplesheet_validator/test/data/samplesheets/invalid/230309_E02631_4297_000000000-KRDLT_SampleSheet.csv)
-2023-12-06 11:47:40,986 - SAMPLESHEET_VALIDATOR - WARNING - Sequencer id not in allowed list (230309_E02631_4297_000000000-KRDLT_SampleSheet.csv, E02631)
-2023-12-06 11:47:40,986 - SAMPLESHEET_VALIDATOR - INFO - Samplesheet is (>10 bytes)
-2023-12-06 11:47:40,986 - SAMPLESHEET_VALIDATOR - INFO - Line in samplesheet identified as containing a sample
