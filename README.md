@@ -53,6 +53,14 @@ print(sscheck_obj.errors_dict)  # View the dictionary of error messages
 
 ### Command line
 
+The environment must be set up as follows:
+```bash
+python3 -m venv venv
+pip3 install -r requirements.txt
+source venv/bin/activate
+```
+
+The script can then be used as follows:
 ```bash
 usage: Used to validate a samplesheet using the seglh-naming conventions
 
@@ -76,6 +84,19 @@ options:
                         Directory to save the output logfile to
 ```
 
+### Testing
+
+Test datasets are stored in [/test/data](../test/data). The script has a full test suite:
+* [test_samplesheet_validator.py](../test/test_samplesheet_validator.py)
+
+These tests should be run before pushing any code to ensure all tests in the GitHub Actions workflow pass. These can be run as follows:
+
+```bash
+python3 -m pytest
+```
+**N.B. Tests and test cases/files MUST be maintained and updated accordingly in conjunction with script development**
+
+
 ## Logging
 
 Logging is performed by [ss_logger](samplesheet_validator/ss_logger.py). The directory to save the log file to is supplied as an argument. The output log file is named by the script as follows:
@@ -85,9 +106,4 @@ The script also collects the error messages as it runs, which can be used by oth
 
 ## Testing
 
-**N.B. Tests and test cases/files MUST be maintained and updated accordingly in conjunction with script development**
 
-Test datasets are stored in [/test/data](../test/data). The script has a full test suite:
-* [test_samplesheet_validator.py](../test/test_samplesheet_validator.py)
-
-These tests should be run before pushing any code to ensure all tests in the GitHub Actions workflow pass.
