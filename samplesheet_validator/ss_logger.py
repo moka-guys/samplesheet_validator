@@ -24,7 +24,9 @@ class SSLogger:
     Creates a python logging object with a file handler, syslog handler and stream handler
 
     Attributes
-        filepath (str): Name of filepath to provide to _file_handler()
+        timestamp (str):                        Timestamp from config
+        logfile_path (str):                     Name of filepath to provide to _file_handler()
+        logging_formatter (logging.Formatter):  Specifies the layout of log records in the final output
 
     Methods
         get_logger()
@@ -40,15 +42,12 @@ class SSLogger:
     def __init__(self, logfile_path: str):
         """
         Constructor for the Logger class
-            :param runfolder_name (str):    Name of runfolder being analysed, used to name logfile
             :param logfile_path (str):      Path to logfile location
         """
         # Timestamp used for naming log files with datetime, format %Y%m%d_%H%M%S
         self.timestamp = config.TIMESTAMP
         self.logfile_path = logfile_path
-        self.logging_formatter = logging.Formatter(
-            "%(asctime)s - SAMPLESHEET_VALIDATOR - %(levelname)s - %(message)s"
-        )
+        self.logging_formatter = logging.Formatter(config.LOGGING_FORMATTER)
 
     def get_logger(self) -> logging.Logger:
         """

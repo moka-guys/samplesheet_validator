@@ -2,6 +2,9 @@ import datetime
 
 TIMESTAMP = str(f"{datetime.datetime.now():%Y%m%d_%H%M%S}")
 
+# Specifies the layout of log records in the final output
+LOGGING_FORMATTER = "%(asctime)s - SAMPLESHEET_VALIDATOR - %(levelname)s - %(message)s"
+
 LOG_MSGS = {
     "ss_present": "Samplesheet with supplied name exists (%s)",
     "ss_absent": "Samplesheet with supplied name does not exist (%s)",
