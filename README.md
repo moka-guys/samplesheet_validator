@@ -32,11 +32,9 @@ NB: Use the --user flag or install into an virtualenv/pipenv if not installing g
 
 ```python
 
-from samplesheet_validator import samplesheet_validator
+from samplesheet_validator.samplesheet_validator import SamplesheetCheck
 
-logger = SSLogger(logfile_path)
-
-sscheck_obj = samplesheet_validator.SamplesheetCheck(
+sscheck_obj = SamplesheetCheck(
     samplesheet_path,  # str
     sequencer_ids,  # list
     panels,  # list
@@ -46,7 +44,6 @@ sscheck_obj = samplesheet_validator.SamplesheetCheck(
     logdir,  # str
 )
 sscheck_obj.ss_checks()  # Carry out samplesheeet validation
-sscheck_obj.log_summary()  # Log a summary of the validation
 
 print(sscheck_obj.errors_dict)  # View the dictionary of error messages
 ```
@@ -95,6 +92,7 @@ These tests should be run before pushing any code to ensure all tests in the Git
 python3 -m pytest
 ```
 **N.B. Tests and test cases/files MUST be maintained and updated accordingly in conjunction with script development**
+**N.B. This includes ensuring that the arguments passed to pytest in the [pytest.ini](pytest.ini) file are kept up to date**
 
 
 ## Logging
@@ -104,6 +102,5 @@ Logging is performed by [ss_logger](samplesheet_validator/ss_logger.py). The dir
 
 The script also collects the error messages as it runs, which can be used by other scripts when this script is used as an import.
 
-## Testing
 
-
+### Developed by the Synnovis Genome Informatics Team

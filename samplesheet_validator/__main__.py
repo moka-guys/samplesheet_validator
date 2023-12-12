@@ -106,4 +106,3 @@ if __name__ == '__main__':
         parsed_args.logdir,
     )
     sscheck_obj.ss_checks()  # Carry out samplesheeet validation
-    sscheck_obj.log_summary()  # Log a summary of the validation
