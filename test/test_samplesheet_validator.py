@@ -1089,8 +1089,7 @@ class TestSamplesheetCheck(object):
         Test log_summary correctly logs summary of no errors
         """
         for samplesheet in valid_samplesheets_with_dev:
-            sscheck_obj = get_sscheck_obj(samplesheet)
-            sscheck_obj.log_summary()  # Log a summary of the validation
+            get_sscheck_obj(samplesheet)
             assert "Samplesheet passed all checks" in caplog.text
 
     def test_log_summary_errors(self, ss_with_disallowed_sserrs, caplog):
@@ -1098,8 +1097,7 @@ class TestSamplesheetCheck(object):
         Test log_summary correctly logs summary of errors
         """
         for samplesheet in ss_with_disallowed_sserrs:
-            sscheck_obj = get_sscheck_obj(samplesheet)
-            sscheck_obj.log_summary()  # Log a summary of the validation
+            get_sscheck_obj(samplesheet)
             assert "Samplesheet did not pass checks" in caplog.text
 
     def test_multiple_errors(self, samplesheets_multiple_errors, caplog):

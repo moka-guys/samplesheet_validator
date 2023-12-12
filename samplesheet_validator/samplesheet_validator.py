@@ -169,6 +169,7 @@ class SamplesheetCheck:
                                         sample, column, sample_obj
                                     )
                         self.check_tso()
+        self.log_summary()
         shutdown_logs(self.logger)
 
     def check_ss_present(self) -> Union[bool, None]:
