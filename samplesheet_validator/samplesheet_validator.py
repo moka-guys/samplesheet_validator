@@ -14,7 +14,7 @@ import os
 import re
 from typing import Union
 from . import config
-from .ss_logger import SSLogger
+from .ss_logger import SSLogger, shutdown_logs
 from seglh_naming.sample import Sample
 from seglh_naming.samplesheet import Samplesheet
 
@@ -111,7 +111,7 @@ class SamplesheetCheck:
         """
         self.samplesheet_path = samplesheet_path
         self.logdir = logdir
-        self.logger = self.get_logger()
+        self.logger = False
         self.ss_obj = False
         self.pannumbers = []
         self.tso = False
@@ -137,14 +137,14 @@ class SamplesheetCheck:
             "_SampleSheet.csv"
         )[0]
         logfile_path = f"{os.path.join(self.logdir, runfolder_name)}_{config.TIMESTAMP}_samplesheet_validator.log"
-        logger = SSLogger(logfile_path).get_logger()
-        return logger
+        return SSLogger(logfile_path).get_logger()
 
     def ss_checks(self) -> None:
         """
         Run checks at samplesheet and sample level. Performs required extra checks for
         checks not included in seglh-naming
         """
+        self.logger = self.get_logger()
         if self.check_ss_present():
             setattr(self, "ss_obj", self.check_ss_name())
             if self.ss_obj:
@@ -169,6 +169,7 @@ class SamplesheetCheck:
                                         sample, column, sample_obj
                                     )
                         self.check_tso()
+        shutdown_logs(self.logger)
 
     def check_ss_present(self) -> Union[bool, None]:
         """
@@ -239,14 +240,14 @@ class SamplesheetCheck:
                 self.logger.log_msgs["dev_run"],
                 self.samplesheet_path,
             )
-            setattr(self, "development_run", True)
+            setattr(self, "dev_run", True)
             return True
         else:
             self.logger.info(
                 self.logger.log_msgs["not_dev_run"],
                 self.samplesheet_path,
             )
-            setattr(self, "development_run", False)
+            setattr(self, "dev_run", False)
 
     def check_sequencer_id(self) -> None:
         """
