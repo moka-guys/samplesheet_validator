@@ -19,11 +19,6 @@ from seglh_naming.sample import Sample
 from seglh_naming.samplesheet import Samplesheet
 
 
-# TODO do I need a Makefile and Dockerfile?
-# TODO update the readme
-# TODO update the readme in the automated scripts repo
-
-
 class SamplesheetCheck:
     """
     Runs the checks. Called by webapp for uploaded samplesheets (uses name of file being uploaded), and
@@ -234,9 +229,7 @@ class SamplesheetCheck:
             :return True | None:            True if contains dev pan numbers, false if does not
         """
         strings_to_check = self.samples["Sample_ID"] + self.samples["Sample_Name"]
-        if any(
-            self.dev_panno in sample_name for sample_name in strings_to_check
-        ):
+        if any(self.dev_panno in sample_name for sample_name in strings_to_check):
             self.logger.info(
                 self.logger.log_msgs["dev_run"],
                 self.samplesheet_path,

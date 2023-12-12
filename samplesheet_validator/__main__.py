@@ -94,7 +94,7 @@ def is_valid_dir(parser: argparse.ArgumentParser, dir: str) -> str:
         return dir
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     parsed_args = get_arguments()
     sscheck_obj = SamplesheetCheck(
         parsed_args.samplesheet_path,
