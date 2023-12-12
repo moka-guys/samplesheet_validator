@@ -37,12 +37,7 @@ def pytest_addoption(parser):
         type=str,
         required=True,
     )
-    parser.addoption(
-        "--dev_panno",
-        action="store",
-        type=str,
-        required=True
-    )
+    parser.addoption("--dev_panno", action="store", type=str, required=True)
     parser.addoption(
         "--logdir",
         action="store",
