@@ -226,7 +226,7 @@ class SamplesheetCheck:
         any development pan numbers
             :param sscheck_obj (object):    Object created by
                                             samplesheet_validator.SampleheetCheck
-            :return True | None:            True if contains dev pan numbers, false if does not
+            :return True | None:            True if contains dev pan numbers, None if does not
         """
         strings_to_check = self.samples["Sample_ID"] + self.samples["Sample_Name"]
         if any(self.dev_panno in sample_name for sample_name in strings_to_check):
