@@ -330,7 +330,7 @@ def invalid_ss_invalid_extension():
         os.path.join(
             os.getenv("samplesheet_dir"),
             "invalid",
-            "211008_A01229_AHKGTFDRXY_samplesheet.abc",
+            "211008_A01229_AHKGTFDRXY_SampleSheet.abc",
         )
     ]
 
