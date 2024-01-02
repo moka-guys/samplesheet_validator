@@ -53,8 +53,8 @@ print(sscheck_obj.errors_dict)  # View the dictionary of error messages
 The environment must be set up as follows:
 ```bash
 python3 -m venv venv
-pip3 install -r requirements.txt
 source venv/bin/activate
+pip3 install -r requirements.txt
 ```
 
 The script can then be used as follows:
