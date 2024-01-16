@@ -29,7 +29,7 @@ class SamplesheetCheck:
         logdir (str):                   Log file directory
         logger (obj):                   Logger object
         ss_obj (False | obj):           seglh-naming samplesheet object
-        development_run (bool):         True if run is a development run, else False
+        dev_run (bool):                 True if run is a development run, else False
         pannumbers (list):              Panel numbers in the sample sheet
         tso (bool):                     True if samplesheet contains any TSO samples
         samples (dict):                 Dictionary of sample IDs and sample names from the samplesheet

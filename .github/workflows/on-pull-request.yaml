@@ -3,7 +3,7 @@ name: Samplesheet Validator
 on:
   push:
     branches:
-      - master
+      - main
       - 'feature/**'
       - 'development'
 jobs:
