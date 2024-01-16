@@ -338,6 +338,7 @@ class SamplesheetCheck:
         if not all(
             header in self.data_headers for header in self.expected_data_headers
         ):
+            self.missing_headers = list(set(self.expected_data_headers).difference(self.data_headers))
             self.errors = True
             self.add_msg_to_error_dict(
                 "Missing headers",
