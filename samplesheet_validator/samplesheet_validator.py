@@ -2,7 +2,7 @@
 """
 Script for checking sample sheet naming and contents.
 
-Uses the seglh-naming library. And adds further lab-specific checks e.g. whether sequencer IDs and library prep names
+Uses the seglh-naming library. And adds further lab-specific checks e.g. whether sequencer IDs 
 match those in lists of allowed IDs. Collects all errors in an errors list (SamplesheetCheck.errors_dict)
 Contains the following classes:
 
@@ -29,7 +29,7 @@ class SamplesheetCheck:
         logdir (str):                   Log file directory
         logger (obj):                   Logger object
         ss_obj (False | obj):           seglh-naming samplesheet object
-        development_run (bool):         True if run is a development run, else False
+        dev_run (bool):                 True if run is a development run, else False
         pannumbers (list):              Panel numbers in the sample sheet
         tso (bool):                     True if samplesheet contains any TSO samples
         samples (dict):                 Dictionary of sample IDs and sample names from the samplesheet
@@ -40,7 +40,6 @@ class SamplesheetCheck:
         expected_data_headers (list):   Headers expected to be present in samplesheet
         sequencer_ids (list):           Valid sequencer IDs
         panels (list):                  Valid pan numbers
-        library_prep_names (list):      Valid library prep names
         tso_panels (list):              Valid TSO pannumbers
         development_panels (list):      Development pan numbers
 
@@ -76,8 +75,6 @@ class SamplesheetCheck:
             Validate sample names using seglh-naming Sample module.
         check_pannos(sample, column, sample_obj)
             Check sample names contain allowed pan numbers from self.panels number list
-        check_library_prep_name(sample, column, sample_obj)
-            Check sample name contains an allowed library prep name from self.library_prep_names
         check_tso()
             Assigns self.tso as True if TSO run
         log_summary()
@@ -89,7 +86,6 @@ class SamplesheetCheck:
         samplesheet_path: str,
         sequencer_ids: list,
         panels: list,
-        library_prep_names: list,
         tso_panels: list,
         dev_panno: str,
         logdir: str,
@@ -99,7 +95,6 @@ class SamplesheetCheck:
             :param samplesheet_path (str):      Path to samplesheet
             :param sequencer_ids (list):        Allowed sequencer IDs
             :param panels (list):               Allowed pan numbers
-            :param library_prep_names (list):   Allowed library prep names
             :param tso_panels (list):           TSO500 pan numbers
             :param dev_panno (str):             Development pan number
             :param logdir (str):                Log file directory
@@ -119,7 +114,6 @@ class SamplesheetCheck:
         self.expected_data_headers = ["Sample_ID", "Sample_Name", "index"]
         self.sequencer_ids = sequencer_ids
         self.panels = panels
-        self.library_prep_names = library_prep_names
         self.tso_panels = tso_panels
         self.dev_panno = dev_panno
 
@@ -160,9 +154,6 @@ class SamplesheetCheck:
                                 sample_obj = self.check_sample(sample, column)
                                 if sample_obj:
                                     self.check_pannos(sample, column, sample_obj)
-                                    self.check_library_prep_name(
-                                        sample, column, sample_obj
-                                    )
                         self.check_tso()
         self.log_summary()
         shutdown_logs(self.logger)
@@ -347,6 +338,7 @@ class SamplesheetCheck:
         if not all(
             header in self.data_headers for header in self.expected_data_headers
         ):
+            self.missing_headers = list(set(self.expected_data_headers).difference(self.data_headers))
             self.errors = True
             self.add_msg_to_error_dict(
                 "Missing headers",
@@ -457,33 +449,6 @@ class SamplesheetCheck:
         else:
             self.logger.info(
                 self.logger.log_msgs["valid_panno"], sample_obj.panelnumber
-            )
-
-    def check_library_prep_name(
-        self, sample: str, column: str, sample_obj: object
-    ) -> None:
-        """
-        Check sample name contains an allowed library prep name from self.library_prep_names
-            :param sample (str):            Sample name
-            :param column (str):            Column header
-            :param sample_obj (object):     seglh-naming sample oject
-            :return None:
-        """
-        # Extract first group of capitalised characters
-        library_prep_name = re.match("^[A-Z]*", sample_obj.libraryprep)
-        if library_prep_name.group(0) not in self.library_prep_names:
-            self.errors = True
-            self.add_msg_to_error_dict(
-                "Library prep name invalid",
-                self.logger.log_msgs["library_prep_name_err"] % (sample, column),
-            )
-            self.logger.warning(
-                self.logger.log_msgs["library_prep_name_err"], sample, column
-            )
-        else:
-            self.logger.info(
-                self.logger.log_msgs["valid_library_prep_name"],
-                library_prep_name.group(0),
             )
 
     def check_tso(self) -> None:

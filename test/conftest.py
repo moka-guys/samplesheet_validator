@@ -26,12 +26,6 @@ def pytest_addoption(parser):
         required=True,
     )
     parser.addoption(
-        "--library_prep_names",
-        action="store",
-        type=str,
-        required=True,
-    )
-    parser.addoption(
         "--tso_panels",
         action="store",
         type=str,
@@ -57,7 +51,6 @@ def pytest_configure(config):
     """
     os.environ["sequencer_ids"] = config.getoption("sequencer_ids")
     os.environ["panels"] = config.getoption("panels")
-    os.environ["library_prep_names"] = config.getoption("library_prep_names")
     os.environ["tso_panels"] = config.getoption("tso_panels")
     os.environ["dev_panno"] = config.getoption("dev_panno")
     data_dir = os.path.abspath("test/data/")
