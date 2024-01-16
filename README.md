@@ -82,6 +82,8 @@ options:
 Test datasets are stored in [/test/data](../test/data). The script has a full test suite:
 * [test_samplesheet_validator.py](../test/test_samplesheet_validator.py)
 
+See [test/README.md](test/README.md) for details about test cases.
+
 These tests should be run before pushing any code to ensure all tests in the GitHub Actions workflow pass. These can be run as follows:
 
 ```bash
