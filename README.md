@@ -17,7 +17,6 @@ Runs a series of checks on the sample sheet, collects any errors identified. Che
 * Sample name does not contain any illegal characters
 * Sample name is valid (validates using the [seglh-naming](https://github.com/moka-guys/seglh-naming/) library)
 * Pan numbers are in the list of allowed pan numbers supplied to the script
-* Library prep name in the sample name is in the list of allowed library prep names supplied to the script
 * Samplesheet contains any TSO samples
 
 ## Usage
@@ -38,7 +37,6 @@ sscheck_obj = SamplesheetCheck(
     samplesheet_path,  # str
     sequencer_ids,  # list
     panels,  # list
-    library_prep_names,  # list
     tso_panels,  # list
     dev_panno,  # str
     logdir,  # str
@@ -71,8 +69,6 @@ options:
                         Comma separated string of allowed sequencer IDS
   -P PANELS, --panels PANELS
                         Comma separated string of allowed panel numbers
-  -R LIBRARY_PREP_NAMES, --library_prep_names LIBRARY_PREP_NAMES
-                        Comma separated string of allowed library prep names
   -T TSO_PANELS, --tso_panels TSO_PANELS
                         Comma separated string of tso panels
   -D DEV_PANNO, --dev_panno DEV_PANNO

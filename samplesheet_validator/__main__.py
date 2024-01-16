@@ -38,13 +38,6 @@ def get_arguments():
         help="Comma separated string of allowed panel numbers",
     )
     parser.add_argument(
-        "-R",
-        "--library_prep_names",
-        type=str,
-        required=True,
-        help="Comma separated string of allowed library prep names",
-    )
-    parser.add_argument(
         "-T",
         "--tso_panels",
         type=str,
@@ -100,7 +93,6 @@ if __name__ == "__main__":
         parsed_args.samplesheet_path,
         parsed_args.sequencer_ids,
         parsed_args.panels,
-        parsed_args.library_prep_names,
         parsed_args.tso_panels,
         parsed_args.dev_panno,
         parsed_args.logdir,

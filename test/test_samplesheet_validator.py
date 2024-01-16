@@ -22,7 +22,6 @@ def get_sscheck_obj(samplesheet: str) -> object:
         samplesheet,
         os.getenv("sequencer_ids").split(","),
         os.getenv("panels").split(","),
-        os.getenv("library_prep_names").split(","),
         os.getenv("tso_panels").split(","),
         os.getenv("dev_panno"),
         os.getenv("temp_dir"),
@@ -157,8 +156,7 @@ def valid_samplesheets_no_dev(
     """
     Test cases with valid paths, files are populated, and valid samplesheet names, and
     contain:
-        Expected headers, matching Sample_IDs and Sample_Names, valid samples, valid pan
-        nos, valid library prep names
+        Expected headers, matching Sample_IDs and Sample_Names, valid samples, valid pan nos
     """
     return list(
         itertools.chain(
@@ -455,20 +453,6 @@ def invalid_libraryprep_name():
             os.getenv("samplesheet_dir"),
             "invalid",
             "221024_A01229_3746_BERIOG2DRX2_SampleSheet.csv",
-        )
-    ]
-
-
-@pytest.fixture(scope="function")
-def disallowed_libraryprep_name():
-    """
-    Samplesheet containing invalid contents - invalid library prep name (not in allowed list of library prep names)
-    """
-    return [
-        os.path.join(
-            os.getenv("samplesheet_dir"),
-            "invalid",
-            "231201_NB552085_0395_AHVNWYAFX5_SampleSheet.csv",
         )
     ]
 
@@ -1036,29 +1020,6 @@ class TestSamplesheetCheck(object):
             sscheck_obj = get_sscheck_obj(samplesheet)
             assert sscheck_obj.errors
             assert "Pan no is invalid" in caplog.text
-            assert "WARNING" in caplog.text
-            shutdown_logs(sscheck_obj.logger)
-
-    def test_check_library_prep_name_valid(self, valid_samplesheets_with_dev, caplog):
-        """
-        Test function is able to correctly identify that library prep names are valid
-        """
-        for samplesheet in valid_samplesheets_with_dev:
-            sscheck_obj = get_sscheck_obj(samplesheet)
-            assert not sscheck_obj.errors
-            assert "Library prep name is valid" in caplog.text
-            assert "WARNING" not in caplog.text
-            shutdown_logs(sscheck_obj.logger)
-
-    def test_check_library_prep_name_invalid(self, disallowed_libraryprep_name, caplog):
-        """
-        Test function is able to correctly identify that library prep names are invalid (not in allowed list supplied
-        to test on cmd line)
-        """
-        for samplesheet in disallowed_libraryprep_name:
-            sscheck_obj = get_sscheck_obj(samplesheet)
-            assert sscheck_obj.errors
-            assert "Library prep name not in allowed list" in caplog.text
             assert "WARNING" in caplog.text
             shutdown_logs(sscheck_obj.logger)
 
