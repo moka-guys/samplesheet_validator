@@ -14,7 +14,7 @@ import os
 import re
 from typing import Union
 from . import config
-from .ss_logger import SSLogger, shutdown_logs
+from .ss_logger import SSLogger
 from seglh_naming.sample import Sample
 from seglh_naming.samplesheet import Samplesheet
 
@@ -155,7 +155,6 @@ class SamplesheetCheck:
                                     self.check_pannos(sample, column, sample_obj)
                         self.check_tso()
         self.log_summary()
-        shutdown_logs(self.logger)
 
     def check_ss_present(self) -> Union[bool, None]:
         """

@@ -22,17 +22,6 @@ def set_root_logger():
     logger.addHandler(stream_handler)
 
 
-def shutdown_logs(logger: object) -> None:
-    """
-    To prevent duplicate filehandlers and system handlers close
-    and remove all handlers for a logging object
-        :return (None):
-    """
-    for handler in logger.handlers[:]:
-        logger.removeHandler(handler)
-        handler.close()
-
-
 class SSLogger:
     """
     Creates a python logging object with a file handler and syslog handler

@@ -6,7 +6,6 @@ import itertools
 import os
 import argparse
 import pytest
-from samplesheet_validator.ss_logger import shutdown_logs
 from samplesheet_validator import samplesheet_validator
 from samplesheet_validator.__main__ import is_valid_dir, is_valid_file
 
