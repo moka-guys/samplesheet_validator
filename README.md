@@ -19,6 +19,8 @@ Runs a series of checks on the sample sheet, collects any errors identified. Che
 * Pan numbers are in the list of allowed pan numbers supplied to the script
 * Samplesheet contains any TSO samples
 
+If samplesheet contains an input dev_panno, the package will skip samplesheet chcks for the samplesheet.
+
 ## Usage
 
 ### Python package
@@ -75,9 +77,15 @@ options:
                         Development pan number
   -L LOGDIR, --logdir LOGDIR
                         Directory to save the output logfile to
+  -NSH NO_STREAM_HANDLER, --no_stream_handler NO_STRAM_HANDLER
+                        Provide flag when we don't want a stream handler (prevents
+                        duplication of log messages to terminal if using another
+                        logging instance)
 ```
 
 ### Testing
+
+This repository currently has **92% test coverage**.
 
 Test datasets are stored in [/test/data](../test/data). The script has a full test suite:
 * [test_samplesheet_validator.py](../test/test_samplesheet_validator.py)

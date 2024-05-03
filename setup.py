@@ -1,10 +1,11 @@
 from setuptools import setup
+from samplesheet_validator.git_tag import git_tag
 
 setup(
     name="samplesheet_validator",
-    version="1.1.0",
+    version=git_tag(),
     description="Python library for samplesheet validation",
-    url="http://github.com/moka-guys/samplesheet_validator",
+    url="https://github.com/moka-guys/samplesheet_validator",
     author="Rachel Duffin",
     author_email="rachel.duffin2@nhs.net",
     license="Apache License, Version 2.0",
