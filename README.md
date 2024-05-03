@@ -83,6 +83,8 @@ options:
 
 ### Testing
 
+This repository currently has **92% test coverage**.
+
 Test datasets are stored in [/test/data](../test/data). The script has a full test suite:
 * [test_samplesheet_validator.py](../test/test_samplesheet_validator.py)
 

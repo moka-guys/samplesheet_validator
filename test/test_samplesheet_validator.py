@@ -10,6 +10,17 @@ from samplesheet_validator import samplesheet_validator
 from samplesheet_validator.__main__ import is_valid_dir, is_valid_file
 
 
+def shutdown_logs(logger: object) -> None:
+    """
+    To prevent duplicate filehandlers and system handlers close
+    and remove all handlers for a logging object
+        :return (None):
+    """
+    for handler in logger.handlers[:]:
+        logger.removeHandler(handler)
+        handler.close()
+
+
 def get_sscheck_obj(samplesheet: str) -> object:
     """
     Function to retrieve a samplesheet check object and carry out the

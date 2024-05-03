@@ -5,7 +5,7 @@ setup(
     name="samplesheet_validator",
     version=git_tag(),
     description="Python library for samplesheet validation",
-    url="https://github.com/moka-guys/samplesheet_validator/tree/feature/fix_stream_handler",
+    url="https://github.com/moka-guys/samplesheet_validator",
     author="Rachel Duffin",
     author_email="rachel.duffin2@nhs.net",
     license="Apache License, Version 2.0",
