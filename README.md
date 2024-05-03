@@ -19,6 +19,8 @@ Runs a series of checks on the sample sheet, collects any errors identified. Che
 * Pan numbers are in the list of allowed pan numbers supplied to the script
 * Samplesheet contains any TSO samples
 
+If samplesheet contains an input dev_panno, the package will skip samplesheet chcks for the samplesheet.
+
 ## Usage
 
 ### Python package
