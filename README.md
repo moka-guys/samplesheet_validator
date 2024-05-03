@@ -75,6 +75,10 @@ options:
                         Development pan number
   -L LOGDIR, --logdir LOGDIR
                         Directory to save the output logfile to
+  -NSH NO_STREAM_HANDLER, --no_stream_handler NO_STRAM_HANDLER
+                        Provide flag when we don't want a stream handler (prevents
+                        duplication of log messages to terminal if using another
+                        logging instance)
 ```
 
 ### Testing

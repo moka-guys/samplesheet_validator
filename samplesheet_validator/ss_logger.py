@@ -8,6 +8,20 @@ import logging
 import logging.handlers
 
 
+def set_root_logger():
+    """
+    Set up root logger and add stream handler - we only want to add stream handler once
+    else it will duplicate log messages to the terminal
+    """
+    logger = logging.getLogger()
+    logger.setLevel(logging.DEBUG)
+    stream_handler = logging.StreamHandler(sys.stdout)
+    stream_handler.setLevel(logging.DEBUG)
+    stream_handler.setFormatter(logging.Formatter(config.LOGGING_FORMATTER))
+    stream_handler.name = "stream_handler"
+    logger.addHandler(stream_handler)
+
+
 def shutdown_logs(logger: object) -> None:
     """
     To prevent duplicate filehandlers and system handlers close
@@ -21,7 +35,7 @@ def shutdown_logs(logger: object) -> None:
 
 class SSLogger:
     """
-    Creates a python logging object with a file handler, syslog handler and stream handler
+    Creates a python logging object with a file handler and syslog handler
 
     Attributes
         timestamp (str):                        Timestamp from config
@@ -35,8 +49,6 @@ class SSLogger:
             Get file handler for the logger
         _get_syslog_handler()
             Get syslog handler for the logger
-        _get_stream_handler()
-            Get stream handler for the logger (sends to stdout)
     """
 
     def __init__(self, logfile_path: str):
@@ -58,7 +70,6 @@ class SSLogger:
         logger.filepath = self.logfile_path
         logger.setLevel(logging.DEBUG)
         logger.addHandler(self._get_file_handler())
-        logger.addHandler(self._get_stream_handler())
         logger.addHandler(self._get_syslog_handler())
         logger.timestamp = self.timestamp
         logger.log_msgs = config.LOG_MSGS
@@ -85,14 +96,3 @@ class SSLogger:
         syslog_handler.setFormatter(self.logging_formatter)
         syslog_handler.name = "syslog_handler"
         return syslog_handler
-
-    def _get_stream_handler(self) -> logging.StreamHandler:
-        """
-        Get stream handler for the logger (sends to stdout)
-            :return stream_handler (logging.StreamHandler): StreamHandler
-        """
-        stream_handler = logging.StreamHandler(sys.stdout)
-        stream_handler.setLevel(logging.DEBUG)
-        stream_handler.setFormatter(self.logging_formatter)
-        stream_handler.name = "stream_handler"
-        return stream_handler

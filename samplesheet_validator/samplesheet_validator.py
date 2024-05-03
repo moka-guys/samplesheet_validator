@@ -101,7 +101,6 @@ class SamplesheetCheck:
         """
         self.samplesheet_path = samplesheet_path
         self.logdir = logdir
-        self.logger = False
         self.ss_obj = False
         self.pannumbers = []
         self.tso = False

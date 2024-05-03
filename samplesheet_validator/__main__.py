@@ -1,6 +1,7 @@
 import os
 import argparse
 from .samplesheet_validator import SamplesheetCheck
+from .ss_logger import set_root_logger
 
 
 def get_arguments():
@@ -58,6 +59,16 @@ def get_arguments():
         required=True,
         help="Directory to save the output logfile to",
     )
+    parser.add_argument(
+        "-NSH",
+        "--no_stream_handler",
+        action='store_true',
+        required=False,
+        help=(
+            "Provide flag when we don't want a stream handler (prevents duplication of log messages "
+            "to terminal if using another logging instance)"
+        ),
+    )
     return parser.parse_args()
 
 
@@ -89,6 +100,8 @@ def is_valid_dir(parser: argparse.ArgumentParser, dir: str) -> str:
 
 if __name__ == "__main__":
     parsed_args = get_arguments()
+    if not parsed_args.no_stream_handler:
+        set_root_logger()  # Adds stream handler
     sscheck_obj = SamplesheetCheck(
         parsed_args.samplesheet_path,
         parsed_args.sequencer_ids,
