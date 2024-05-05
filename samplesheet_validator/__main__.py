@@ -1,7 +1,10 @@
 import os
+import sys
+import logging
 import argparse
 from .samplesheet_validator import SamplesheetCheck
 from .ss_logger import set_root_logger
+from .config import LOGGING_FORMATTER
 
 
 def get_arguments():
@@ -98,10 +101,10 @@ def is_valid_dir(parser: argparse.ArgumentParser, dir: str) -> str:
         return dir
 
 
+
 if __name__ == "__main__":
     parsed_args = get_arguments()
-    if not parsed_args.no_stream_handler:
-        set_root_logger()  # Adds stream handler
+    logger = set_root_logger(parsed_args.no_stream_handler)
     sscheck_obj = SamplesheetCheck(
         parsed_args.samplesheet_path,
         parsed_args.sequencer_ids,
@@ -111,3 +114,4 @@ if __name__ == "__main__":
         parsed_args.logdir,
     )
     sscheck_obj.ss_checks()  # Carry out samplesheeet validation
+

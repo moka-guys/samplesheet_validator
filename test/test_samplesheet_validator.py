@@ -904,7 +904,7 @@ class TestSamplesheetCheck(object):
         for samplesheet in valid_samplesheets_with_dev:
             sscheck_obj = get_sscheck_obj(samplesheet)
             assert (
-                "Line in samplesheet identified as containing a sample" in caplog.text
+                "samplesheet identified as containing a sample" in caplog.text
             )
             shutdown_logs(sscheck_obj.logger)
 

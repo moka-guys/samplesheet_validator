@@ -8,18 +8,27 @@ import logging
 import logging.handlers
 
 
-def set_root_logger():
+def set_root_logger(no_stream_handler: bool):
     """
-    Set up root logger and add stream handler - we only want to add stream handler once
-    else it will duplicate log messages to the terminal
+    Set up root logger and add stream handler and syslog handler - we only want to add these once
+    else it will duplicate log messages to the terminal. All loggers named with the same stem
+    as the root logger will use these same syslog handler and stream handler
+        :param no_stream_handler (bool):    True if no stream handler specified as command line input
     """
+    formatter = logging.Formatter(config.LOGGING_FORMATTER)
     logger = logging.getLogger()
     logger.setLevel(logging.DEBUG)
-    stream_handler = logging.StreamHandler(sys.stdout)
-    stream_handler.setLevel(logging.DEBUG)
-    stream_handler.setFormatter(logging.Formatter(config.LOGGING_FORMATTER))
-    stream_handler.name = "stream_handler"
-    logger.addHandler(stream_handler)
+    syslog_handler = logging.handlers.SysLogHandler(address="/dev/log")
+    syslog_handler.setFormatter(formatter)
+    syslog_handler.name = "syslog_handler"
+    logger.addHandler(syslog_handler)
+    if not no_stream_handler:
+        stream_handler = logging.StreamHandler(sys.stdout)
+        stream_handler.setFormatter(formatter)
+        stream_handler.name = "stream_handler"
+        logger.addHandler(stream_handler)
+    return logger
+
 
 
 class SSLogger:
@@ -27,12 +36,12 @@ class SSLogger:
     Creates a python logging object with a file handler and syslog handler
 
     Attributes
-        timestamp (str):                        Timestamp from config
         logfile_path (str):                     Name of filepath to provide to _file_handler()
+        runfolder_name (str):                   Runfolder name
         logging_formatter (logging.Formatter):  Specifies the layout of log records in the final output
 
     Methods
-        get_logger()
+        get_logger(logger_name)
             Returns a Python logging object
         _get_file_handler()
             Get file handler for the logger
@@ -40,27 +49,27 @@ class SSLogger:
             Get syslog handler for the logger
     """
 
-    def __init__(self, logfile_path: str):
+    def __init__(self, logfile_path: str, runfolder_name: str):
         """
         Constructor for the Logger class
             :param logfile_path (str):      Path to logfile location
+            :param runfolder_name (str):    Runfolder name
         """
         # Timestamp used for naming log files with datetime, format %Y%m%d_%H%M%S
-        self.timestamp = config.TIMESTAMP
         self.logfile_path = logfile_path
+        self.runfolder_name = runfolder_name
         self.logging_formatter = logging.Formatter(config.LOGGING_FORMATTER)
 
-    def get_logger(self) -> logging.Logger:
+    def get_logger(self, logger_name: str) -> logging.Logger:
         """
         Returns a Python logging object, and give it a name
+            :param logger_name (str):   Logger name string
             :return logger (object):    Python logging object with custom attributes
         """
-        logger = logging.getLogger()
+        logger = logging.getLogger(f"{logger_name}.{self.runfolder_name}")
         logger.filepath = self.logfile_path
         logger.setLevel(logging.DEBUG)
         logger.addHandler(self._get_file_handler())
-        logger.addHandler(self._get_syslog_handler())
-        logger.timestamp = self.timestamp
         logger.log_msgs = config.LOG_MSGS
         return logger
 
@@ -74,14 +83,3 @@ class SSLogger:
         file_handler.setFormatter(self.logging_formatter)
         file_handler.name = "file_handler"
         return file_handler
-
-    def _get_syslog_handler(self) -> logging.handlers.SysLogHandler:
-        """
-        Get syslog handler for the logger, and give it a name
-            :return syslog_handler (logging.SysLogHandler): SysLogHandler
-        """
-        syslog_handler = logging.handlers.SysLogHandler(address="/dev/log")
-        syslog_handler.setLevel(logging.DEBUG)
-        syslog_handler.setFormatter(self.logging_formatter)
-        syslog_handler.name = "syslog_handler"
-        return syslog_handler
