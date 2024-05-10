@@ -3,7 +3,7 @@ import datetime
 TIMESTAMP = str(f"{datetime.datetime.now():%Y%m%d_%H%M%S}")
 
 # Specifies the layout of log records in the final output
-LOGGING_FORMATTER = "%(asctime)s - SAMPLESHEET_VALIDATOR - %(levelname)s - %(message)s"
+LOGGING_FORMATTER = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 
 LOG_MSGS = {
     "ss_present": "Samplesheet with supplied name exists (%s)",
@@ -14,11 +14,11 @@ LOG_MSGS = {
     "sequencer_id_invalid": "Sequencer id not in allowed list (%s, %s)",
     "ss_not_empty": "Samplesheet is (>10 bytes)",
     "ss_empty": "Samplesheet empty (<10 bytes)",
-    "found_header_line": "Line in samplesheet identified as a header line",
-    "found_sample_line": "Line in samplesheet identified as containing a sample",
-    "error_extracting_headers": "An error was encountered when extracting headers from the samplesheet: %s",
-    "found_empty_line": "Line in samplesheet is an empty line",
-    "col_extraction_error": "Exception raised while attempting to extract %s from sample line %s: %s",
+    "found_header_line": "Line %s in samplesheet identified as a header line",
+    "found_sample_line": "Line %s in samplesheet identified as containing a sample",
+    "error_extracting_headers": "An error was encountered when extracting headers from the samplesheet, from line %s: %s",
+    "found_empty_line": "Line %s in samplesheet is an empty line",
+    "col_extraction_error": "Exception raised while attempting to extract %s from sample line %s, %s: %s",
     "headers_as_expected": "Expected headers present in samplesheet",
     "headers_err": "Header(/s) missing from [Data] section: '%s'",
     "samplenames_match": "All sample names and sample IDS match",
