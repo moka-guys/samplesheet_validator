@@ -11,7 +11,10 @@ def git_tag() -> str:
     cmd = f"git -C {filepath} describe --tags"
 
     proc = subprocess.Popen(
-        [cmd], stderr=subprocess.PIPE, stdout=subprocess.PIPE, shell=True,
+        [cmd],
+        stderr=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        shell=True,
     )
     out, _ = proc.communicate()
     #  Return standard out, removing any new line characters

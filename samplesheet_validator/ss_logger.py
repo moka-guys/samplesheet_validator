@@ -2,6 +2,7 @@
 
 Class used to create Samplesheet Validator logfiles
 """
+
 import sys
 from . import config
 import logging
@@ -28,7 +29,6 @@ def set_root_logger(no_stream_handler: bool):
         stream_handler.name = "stream_handler"
         logger.addHandler(stream_handler)
     return logger
-
 
 
 class SSLogger:
