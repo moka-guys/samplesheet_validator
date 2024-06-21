@@ -14,7 +14,6 @@ import os
 import re
 import logging
 from typing import Union
-from . import config
 from .ss_logger import SSLogger
 from seglh_naming.sample import Sample
 from seglh_naming.samplesheet import Samplesheet
@@ -45,7 +44,7 @@ class SamplesheetCheck:
         development_panels (list):      Development pan numbers
         runfolder_name (str):           Name of runfolder
         logfile_path (str):             Path to use for logfile
-        logger (logging.Logger):        Logger                      
+        logger (logging.Logger):        Logger
 
     Methods:
         get_logger()
@@ -91,7 +90,7 @@ class SamplesheetCheck:
         sequencer_ids: list,
         panels: list,
         tso_panels: list,
-        dev_panno: str,
+        dev_pannos: list,
         logdir: str,
     ):
         """
@@ -100,7 +99,7 @@ class SamplesheetCheck:
             :param sequencer_ids (list):        Allowed sequencer IDs
             :param panels (list):               Allowed pan numbers
             :param tso_panels (list):           TSO500 pan numbers
-            :param dev_panno (str):             Development pan number
+            :param dev_pannos (list):           Development pan numbers
             :param logdir (str):                Log file directory
         """
         self.samplesheet_path = samplesheet_path
@@ -118,11 +117,14 @@ class SamplesheetCheck:
         self.sequencer_ids = sequencer_ids
         self.panels = panels
         self.tso_panels = tso_panels
-        self.dev_panno = dev_panno
-        self.runfolder_name = (self.samplesheet_path.split("/")[-1]).split("_SampleSheet.csv")[0]
-        self.logfile_path = f"{os.path.join(logdir, self.runfolder_name)}_samplesheet_validator.log"
+        self.dev_pannos = dev_pannos
+        self.runfolder_name = (self.samplesheet_path.split("/")[-1]).split(
+            "_SampleSheet.csv"
+        )[0]
+        self.logfile_path = (
+            f"{os.path.join(logdir, self.runfolder_name)}_samplesheet_validator.log"
+        )
         self.logger = self.get_logger()
-
 
     def get_logger(self) -> logging.Logger:
         """
@@ -130,7 +132,6 @@ class SamplesheetCheck:
             :return (object):   Logger
         """
         return SSLogger(self.logfile_path, self.runfolder_name).get_logger(__name__)
-
 
     def ss_checks(self) -> None:
         """
@@ -222,7 +223,11 @@ class SamplesheetCheck:
             :return True | None:            True if contains dev pan numbers, None if does not
         """
         strings_to_check = self.samples["Sample_ID"] + self.samples["Sample_Name"]
-        if any(self.dev_panno in sample_name for sample_name in strings_to_check):
+
+        if any(
+            any(dev_panno in sample_string for sample_string in strings_to_check)
+            for dev_panno in self.dev_pannos
+        ):
             self.logger.info(
                 self.logger.log_msgs["dev_run"],
                 self.samplesheet_path,
@@ -286,7 +291,9 @@ class SamplesheetCheck:
                     self.extract_headers(line, line_index)
                     break
                 elif len(line.split(",")[0]) < 2:
-                    self.logger.info(self.logger.log_msgs["found_empty_line"], line_index)
+                    self.logger.info(
+                        self.logger.log_msgs["found_empty_line"], line_index
+                    )
                     pass  # Skip empty lines
                 else:  # Contains sample
                     self.extract_sample_name_id(line, line_index)
@@ -307,7 +314,8 @@ class SamplesheetCheck:
             )
             self.add_msg_to_error_dict(
                 "Error extracting headers",
-                self.logger.log_msgs["error_extracting_headers"] % (line_index, exception),
+                self.logger.log_msgs["error_extracting_headers"]
+                % (line_index, exception),
             )
 
     def extract_sample_name_id(self, line: str, line_index: int) -> None:
@@ -324,11 +332,16 @@ class SamplesheetCheck:
             except Exception as exception:
                 self.errors = True
                 self.logger.warning(
-                    self.logger.log_msgs["col_extraction_error"], col_name, line_index, line, exception,
+                    self.logger.log_msgs["col_extraction_error"],
+                    col_name,
+                    line_index,
+                    line,
+                    exception,
                 )
                 self.add_msg_to_error_dict(
                     "Error extracting sample name and ID",
-                    self.logger.log_msgs["col_extraction_error"] % (col_name, line_index, line, exception)
+                    self.logger.log_msgs["col_extraction_error"]
+                    % (col_name, line_index, line, exception),
                 )
 
     def check_expected_headers(self) -> None:
@@ -340,7 +353,9 @@ class SamplesheetCheck:
         if not all(
             header in self.data_headers for header in self.expected_data_headers
         ):
-            self.missing_headers = list(set(self.expected_data_headers).difference(self.data_headers))
+            self.missing_headers = list(
+                set(self.expected_data_headers).difference(self.data_headers)
+            )
             self.errors = True
             self.add_msg_to_error_dict(
                 "Missing headers",
