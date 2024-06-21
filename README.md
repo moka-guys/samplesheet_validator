@@ -19,7 +19,7 @@ Runs a series of checks on the sample sheet, collects any errors identified. Che
 * Pan numbers are in the list of allowed pan numbers supplied to the script
 * Samplesheet contains any TSO samples
 
-If samplesheet contains an input dev_panno, the package will skip samplesheet chcks for the samplesheet.
+If samplesheet contains an input dev_pannos, the package will skip samplesheet checks for the samplesheet.
 
 ## Usage
 
@@ -40,7 +40,7 @@ sscheck_obj = SamplesheetCheck(
     sequencer_ids,  # list
     panels,  # list
     tso_panels,  # list
-    dev_panno,  # str
+    dev_pannos,  # list
     logdir,  # str
 )
 sscheck_obj.ss_checks()  # Carry out samplesheeet validation
@@ -73,8 +73,8 @@ options:
                         Comma separated string of allowed panel numbers
   -T TSO_PANELS, --tso_panels TSO_PANELS
                         Comma separated string of tso panels
-  -D DEV_PANNO, --dev_panno DEV_PANNO
-                        Development pan number
+  -D DEV_PANNOS, --dev_pannos DEV_PANNOS
+                        Development pan numbers
   -L LOGDIR, --logdir LOGDIR
                         Directory to save the output logfile to
   -NSH NO_STREAM_HANDLER, --no_stream_handler NO_STRAM_HANDLER

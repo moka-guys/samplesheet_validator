@@ -50,10 +50,10 @@ def get_arguments():
     )
     parser.add_argument(
         "-D",
-        "--dev_panno",
+        "--dev_pannos",
         type=str,
         required=True,
-        help="Development pan number",
+        help="Comma separated string of development pan numbers",
     )
     parser.add_argument(
         "-L",
@@ -65,7 +65,7 @@ def get_arguments():
     parser.add_argument(
         "-NSH",
         "--no_stream_handler",
-        action='store_true',
+        action="store_true",
         required=False,
         help=(
             "Provide flag when we don't want a stream handler (prevents duplication of log messages "
@@ -101,7 +101,6 @@ def is_valid_dir(parser: argparse.ArgumentParser, dir: str) -> str:
         return dir
 
 
-
 if __name__ == "__main__":
     parsed_args = get_arguments()
     logger = set_root_logger(parsed_args.no_stream_handler)
@@ -110,8 +109,7 @@ if __name__ == "__main__":
         parsed_args.sequencer_ids,
         parsed_args.panels,
         parsed_args.tso_panels,
-        parsed_args.dev_panno,
+        parsed_args.dev_pannos,
         parsed_args.logdir,
     )
     sscheck_obj.ss_checks()  # Carry out samplesheeet validation
-
