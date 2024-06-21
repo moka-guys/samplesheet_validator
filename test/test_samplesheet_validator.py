@@ -10,6 +10,8 @@ from samplesheet_validator import samplesheet_validator
 from samplesheet_validator.__main__ import is_valid_dir, is_valid_file
 
 
+# TODO add second dev pan number in
+
 def shutdown_logs(logger: object) -> None:
     """
     To prevent duplicate filehandlers and system handlers close
@@ -33,7 +35,7 @@ def get_sscheck_obj(samplesheet: str) -> object:
         os.getenv("sequencer_ids").split(","),
         os.getenv("panels").split(","),
         os.getenv("tso_panels").split(","),
-        os.getenv("dev_panno"),
+        os.getenv("dev_pannos").split(","),
         os.getenv("temp_dir"),
     )
     sscheck_obj.ss_checks()
@@ -66,6 +68,11 @@ def valid_dev_samplesheet():
             os.getenv("samplesheet_dir"),
             "valid",
             "231012_M02631_0285_000000000-LBGMH_SampleSheet.csv",
+        ),
+        os.path.join(
+            os.getenv("samplesheet_dir"),
+            "valid",
+            "231012_M02631_0285_000000000-ERTFB_SampleSheet.csv",
         )
     ]
 
