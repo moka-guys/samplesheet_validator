@@ -30,28 +30,28 @@ def get_arguments():
     parser.add_argument(
         "-SI",
         "--sequencer_ids",
-        type=str,
+        type=lambda s: [i for i in s.split(',')],
         required=True,
         help="Comma separated string of allowed sequencer IDS",
     )
     parser.add_argument(
         "-P",
         "--panels",
-        type=str,
+        type=lambda s: [i for i in s.split(',')],
         required=True,
         help="Comma separated string of allowed panel numbers",
     )
     parser.add_argument(
         "-T",
         "--tso_panels",
-        type=str,
+        type=lambda s: [i for i in s.split(',')],
         required=True,
         help="Comma separated string of tso panels",
     )
     parser.add_argument(
         "-D",
         "--dev_pannos",
-        type=str,
+        type=lambda s: [i for i in s.split(',')],
         required=True,
         help="Comma separated string of development pan numbers",
     )
