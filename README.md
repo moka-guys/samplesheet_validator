@@ -74,7 +74,7 @@ options:
   -T TSO_PANELS, --tso_panels TSO_PANELS
                         Comma separated string of tso panels
   -D DEV_PANNOS, --dev_pannos DEV_PANNOS
-                        Development pan numbers
+                        Comma separated development pan numbers
   -L LOGDIR, --logdir LOGDIR
                         Directory to save the output logfile to
   -NSH NO_STREAM_HANDLER, --no_stream_handler NO_STRAM_HANDLER
