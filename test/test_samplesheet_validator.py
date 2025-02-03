@@ -26,9 +26,9 @@ def shutdown_logs(logger: object) -> None:
 def get_sscheck_obj(samplesheet: str) -> object:
     """
     Function to retrieve a samplesheet check object and carry out the
-    samplesheet checks for a supplied samplesheet
+    samplesheet checks for a supplied samplesheet in illumina run
         :param samplesheet (str):       Samplesheet path
-        :return sscheck_obj (object:    SamplesheetCheck object
+        :return sscheck_obj (object):    SamplesheetCheck object
     """
     sscheck_obj = samplesheet_validator.SamplesheetCheck(
         samplesheet,
@@ -37,6 +37,28 @@ def get_sscheck_obj(samplesheet: str) -> object:
         os.getenv("tso_panels").split(","),
         os.getenv("dev_pannos").split(","),
         os.getenv("temp_dir"),
+        True,
+        os.getenv("runname")
+    )
+    sscheck_obj.ss_checks()
+    return sscheck_obj
+
+def get_sscheck_aviti_obj(samplesheet: str) -> object:
+    """
+    Function to retrieve a samplesheet check object and carry out the
+    samplesheet checks for a supplied samplesheet in aviti run
+        :param samplesheet (str):       Samplesheet path
+        :return sscheck_obj (object):    SamplesheetCheck object
+    """
+    sscheck_obj = samplesheet_validator.SamplesheetCheck(
+        samplesheet,
+        os.getenv("sequencer_ids").split(","),
+        os.getenv("panels").split(","),
+        os.getenv("tso_panels").split(","),
+        os.getenv("dev_pannos").split(","),
+        os.getenv("temp_dir"),
+        False,
+        os.getenv("runname")
     )
     sscheck_obj.ss_checks()
     return sscheck_obj
@@ -276,6 +298,44 @@ def invalid_ss_sequencerid():
             os.getenv("samplesheet_dir"),
             "invalid",
             "211008_1229_0040_AHKGTFDRXY_SampleSheet.csv",
+        )
+    ]
+@pytest.fixture(scope="function")
+def valid_aviti_samplesheet():
+    """
+    Valid aviti samplesheets
+    """
+    return [
+        os.path.join(
+            os.getenv("samplesheet_dir"),
+            "valid",
+            "RunManifest.csv",
+        )
+    ]
+
+@pytest.fixture(scope="function")
+def invalid_aviti_ss_sequencerid():
+    """
+    Samplesheet exists but has invalid aviti sequencer ID
+    """
+    return [
+        os.path.join(
+            os.getenv("samplesheet_dir"),
+            "invalid",
+            "RunManifest_invalid_seqid.csv",
+        )
+    ]
+
+@pytest.fixture(scope="function")
+def invalid_aviti_ss_runname():
+    """
+    Samplesheet exists but has invalid run name
+    """
+    return [
+        os.path.join(
+            os.getenv("samplesheet_dir"),
+            "invalid",
+            "RunManifest_invalid_runname.csv",
         )
     ]
 
@@ -851,7 +911,7 @@ class TestSamplesheetCheck(object):
 
     def test_check_sequencer_id_valid(self, valid_samplesheets_with_dev, caplog):
         """
-        Test function is able to correctly identify that sequencer ids are valid
+        Test function is able to correctly identify that illumina sequencer ids are valid
         """
         for samplesheet in valid_samplesheets_with_dev:
             sscheck_obj = get_sscheck_obj(samplesheet)
@@ -862,10 +922,55 @@ class TestSamplesheetCheck(object):
 
     def test_check_sequencer_id_invalid(self, invalid_ss_sequencerid, caplog):
         """
-        Test function is able to correctly identify that sequencer ids are invalid
+        Test function is able to correctly identify that illumina sequencer ids are invalid
         """
         for samplesheet in invalid_ss_sequencerid:
             sscheck_obj = get_sscheck_obj(samplesheet)
+            assert sscheck_obj.errors
+            assert "Sequencer id not in allowed list" in caplog.text
+            assert "WARNING" in caplog.text
+            shutdown_logs(sscheck_obj.logger)
+
+    def test_check_aviti_runname_valid(self, valid_aviti_samplesheet, caplog):
+        """
+        Test function is able to correctly identify that aviti run name is valid
+        """
+        for samplesheet in valid_aviti_samplesheet:
+            sscheck_obj = get_sscheck_aviti_obj(samplesheet)
+            assert not sscheck_obj.errors
+            assert "The run name from sample sheet matches Aviti run" in caplog.text
+            assert "WARNING" not in caplog.text
+            shutdown_logs(sscheck_obj.logger)
+
+    def test_check_aviti_runname_invalid(self, invalid_aviti_ss_runname, caplog):
+        """
+        Test function is able to correctly identify that aviti run name is invalid
+        """
+        for samplesheet in invalid_aviti_ss_runname:
+            sscheck_obj = get_sscheck_aviti_obj(samplesheet)
+            assert sscheck_obj.errors
+            assert "The run name from sample sheet does not match Aviti run" in caplog.text
+            assert "WARNING" in caplog.text
+            shutdown_logs(sscheck_obj.logger)
+
+    
+    def test_check_aviti_sequencer_id_valid(self, valid_aviti_samplesheet, caplog):
+        """
+        Test function is able to correctly identify that aviti sequencer id is valid
+        """
+        for samplesheet in valid_aviti_samplesheet:
+            sscheck_obj = get_sscheck_aviti_obj(samplesheet)
+            assert not sscheck_obj.errors
+            assert "Sequencer ID in samplesheet name is valid" in caplog.text
+            assert "WARNING" not in caplog.text
+            shutdown_logs(sscheck_obj.logger)
+
+    def test_check_aviti_sequencer_id_invalid(self, invalid_aviti_ss_sequencerid, caplog):
+        """
+        Test function is able to correctly identify that aviti sequencer id is invalid
+        """
+        for samplesheet in invalid_aviti_ss_sequencerid:
+            sscheck_obj = get_sscheck_aviti_obj(samplesheet)
             assert sscheck_obj.errors
             assert "Sequencer id not in allowed list" in caplog.text
             assert "WARNING" in caplog.text
