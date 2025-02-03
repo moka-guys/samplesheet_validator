@@ -8,11 +8,12 @@ sheet (SamplesheetCheck.tso).
 
 Runs a series of checks on the sample sheet, collects any errors identified. Checks whether: 
 * Sample sheet exists
-* Samplesheet name is valid (validates using the [seglh-naming](https://github.com/moka-guys/seglh-naming/) library)
+* Samplesheet name is valid for Illumina sample sheet (validates using the [seglh-naming](https://github.com/moka-guys/seglh-naming/) library)
+* Aviti run name from the sample sheet matches with the actual processed run folder name for Aviti sample sheet
 * Sequencer ID is in the list of allowed sequencer IDs supplied to the script
 * Samplesheet is not empty (>10 bytes)
 * Samplesheet is for a development run, using the development pan number supplied to the script
-* Samplesheet contains the minimum expected `[Data]` section headers: `Sample_ID, Sample_Name, index`
+* Samplesheet contains the minimum expected `[Data]` section headers: `Sample_ID, Sample_Name, index` for Illumina
 * `Sample_ID` and `Sample_Name` match for each sample in the data section of the samplesheet
 * Sample name does not contain any illegal characters
 * Sample name is valid (validates using the [seglh-naming](https://github.com/moka-guys/seglh-naming/) library)
@@ -42,6 +43,8 @@ sscheck_obj = SamplesheetCheck(
     tso_panels,  # list
     dev_pannos,  # list
     logdir,  # str
+    illumina, # bool
+    runname, # str
 )
 sscheck_obj.ss_checks()  # Carry out samplesheeet validation
 
@@ -81,6 +84,8 @@ options:
                         Provide flag when we don't want a stream handler (prevents
                         duplication of log messages to terminal if using another
                         logging instance)
+  -R RUN_FOLDER_NAME, --runname RUN_FOLDER_NAME
+                        Str for processed folder name
 ```
 
 ### Testing
