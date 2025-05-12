@@ -124,7 +124,7 @@ class SamplesheetCheck:
         self.errors_dict = {}
         self.data_headers = []  # Populate with headers from data section
         self.missing_headers = []  # Populate with missing headers
-        self.illumina = illumina        
+        self.illumina = illumina      
         self.runname = runname
         if self.illumina:
             self.expected_data_headers = ["Sample_ID", "Sample_Name", "index"]
@@ -140,7 +140,7 @@ class SamplesheetCheck:
                 "_SampleSheet.csv"
             )[0]
         else:
-            self.runfolder_name = self.get_aviti_run_folder_name()
+            self.runfolder_name = self.runname
         self.logfile_path = (
             f"{os.path.join(logdir, self.runfolder_name)}_samplesheet_validator.log"
         )
@@ -162,6 +162,7 @@ class SamplesheetCheck:
             if self.illumina: # if illumina, check if the ss name follows the convenction
                 setattr(self, "ss_obj", self.check_ss_name())
             else: # if aviti, check if the run folder name matches
+                self.get_aviti_run_folder_name()
                 self.check_run_folder_name()
             if self.ss_obj or not self.illumina:
                 self.check_sequencer_id()
@@ -275,8 +276,7 @@ class SamplesheetCheck:
         if self.illumina:
             seq_to_check = self.ss_obj.sequencerid
         else:
-            seq_to_check = self.aviti_seqid
-
+            seq_to_check = self.aviti_seq_id
         if seq_to_check not in self.sequencer_ids:
             self.errors = True
             self.add_msg_to_error_dict(
@@ -527,19 +527,19 @@ class SamplesheetCheck:
             self.logger.info(
                 self.logger.log_msgs["sschecks_passed"], self.samplesheet_path
             )
-
+    
     def get_aviti_run_folder_name(self) -> str:
         """
-        Extract the run folder name and the seqID from the sample 
-        sheet content
-            :return run folder name
+        Obtain RunName inserted in samplesheet to check samplesheet has correct name given and
+        aviti sequencer id from the samplesheet name to assign to object
+            :return None
         """
         with open(self.samplesheet_path, "r") as ss_file:
             ss_file_contents = ss_file.readlines()
             run_name = ss_file_contents[2]
             run_name = run_name.split(",", 1)[1].split(",", 1)[0]
-            self.aviti_seqid = run_name.split("_")[1]
-        return run_name 
+            self.aviti_seq_id = (self.samplesheet_path.split("/")[-1]).split("_")[1]
+            self.ss_runname = run_name
     
     def check_run_folder_name(self) -> None:
         """
@@ -547,7 +547,7 @@ class SamplesheetCheck:
         matches the processed run folder  
             :return None:      
         """
-        if not self.runfolder_name == self.runname:
+        if not self.runfolder_name.split("_")[-1] == self.ss_runname:
             self.errors = True
             self.add_msg_to_error_dict(
                 "Aviti not match",
