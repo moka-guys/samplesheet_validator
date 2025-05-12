@@ -309,7 +309,7 @@ def valid_aviti_samplesheet():
         os.path.join(
             os.getenv("samplesheet_dir"),
             "valid",
-            "RunManifest.csv",
+            "250123_AV241501_A2434485185_SampleSheet.csv",
         )
     ]
 
@@ -322,7 +322,7 @@ def invalid_aviti_ss_sequencerid():
         os.path.join(
             os.getenv("samplesheet_dir"),
             "invalid",
-            "RunManifest_invalid_seqid.csv",
+            "250123_AV24150_A2434485185_SampleSheet.csv",
         )
     ]
 
@@ -335,7 +335,7 @@ def invalid_aviti_ss_runname():
         os.path.join(
             os.getenv("samplesheet_dir"),
             "invalid",
-            "RunManifest_invalid_runname.csv",
+            "250123_AV241501_A2434485185_SampleSheet.csv",
         )
     ]
 
