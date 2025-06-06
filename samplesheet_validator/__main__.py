@@ -30,28 +30,28 @@ def get_arguments():
     parser.add_argument(
         "-SI",
         "--sequencer_ids",
-        type=str,
+        type=lambda s: [i for i in s.split(',')],
         required=True,
         help="Comma separated string of allowed sequencer IDS",
     )
     parser.add_argument(
         "-P",
         "--panels",
-        type=str,
+        type=lambda s: [i for i in s.split(',')],
         required=True,
         help="Comma separated string of allowed panel numbers",
     )
     parser.add_argument(
         "-T",
         "--tso_panels",
-        type=str,
+        type=lambda s: [i for i in s.split(',')],
         required=True,
         help="Comma separated string of tso panels",
     )
     parser.add_argument(
         "-D",
         "--dev_pannos",
-        type=str,
+        type=lambda s: [i for i in s.split(',')],
         required=True,
         help="Comma separated string of development pan numbers",
     )
@@ -71,6 +71,12 @@ def get_arguments():
             "Provide flag when we don't want a stream handler (prevents duplication of log messages "
             "to terminal if using another logging instance)"
         ),
+    ),
+    parser.add_argument(
+        "-R",
+        "--runname",
+        required=True,
+        help="Aviti run folder name",
     )
     return parser.parse_args()
 
@@ -104,6 +110,10 @@ def is_valid_dir(parser: argparse.ArgumentParser, dir: str) -> str:
 if __name__ == "__main__":
     parsed_args = get_arguments()
     logger = set_root_logger(parsed_args.no_stream_handler)
+    if os.path.basename(parsed_args.samplesheet_path).endswith("SampleSheet.csv"):
+        ILLUMINA = True
+    else:
+        ILLUMINA = False
     sscheck_obj = SamplesheetCheck(
         parsed_args.samplesheet_path,
         parsed_args.sequencer_ids,
@@ -111,5 +121,7 @@ if __name__ == "__main__":
         parsed_args.tso_panels,
         parsed_args.dev_pannos,
         parsed_args.logdir,
+        ILLUMINA,
+        parsed_args.runname
     )
     sscheck_obj.ss_checks()  # Carry out samplesheeet validation

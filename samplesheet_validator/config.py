@@ -26,7 +26,7 @@ LOG_MSGS = {
     "no_illegal_chars": "Sample name %s contains no illegal characters in column %s",
     "illegal_chars": "Sample name contains invalid characters (%s: %s)",
     "sample_name_valid": "Sample name valid: %s (%s)",
-    "sample_name_invalid": "Sample name invalid (%s). Exception: %s",
+    "sample_name_invalid": "Sample name invalid (%s). For Aviti, sample ID/name are in one col. Exception: %s",
     "valid_panno": "Pan no is valid: %s",
     "invalid_panno": "Pan no is invalid: %s (%s: %s)",
     "valid_library_prep_name": "Library prep name is valid: %s",
@@ -37,4 +37,6 @@ LOG_MSGS = {
     "not_tso_run": "Samplesheet is not for a TSO run",
     "sschecks_not_passed": "Samplesheet did not pass checks: %s",
     "sschecks_passed": "Samplesheet passed all checks %s",
+    "Aviti match": "The run name from sample sheet matches Aviti run %s",
+    "Aviti not match": "The run name from sample sheet does not match Aviti run %s"
 }

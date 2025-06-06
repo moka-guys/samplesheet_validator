@@ -43,6 +43,8 @@ invalid.
 | [231012_M02631_1234_000000000-LBGMH_SampleSheet.csv](data/samplesheets/invalid/231012_M02631_1234_000000000-LBGMH_SampleSheet.csv) | Invalid contents - Not enough identifiers in sample name |
 | [231201_NB552085_0945_AHVNWYERYU_SampleSheet.csv](data/samplesheets/invalid/231201_NB552085_0945_AHVNWYERYU_SampleSheet.csv) | Invalid contents - invalid panel number |
 | [2110915_M02353_0632_000000000-K242J_SampleSheet.csv](data/samplesheets/invalid/2110915_M02353_0632_000000000-K242J_SampleSheet.csv) | Invalid date |
+| [RunManifest_invalid_runname.csv](data/samplesheets/invalid/RunManifest_invalid_runname.csv) | Invalid aviti runname |
+| [RunManifest_invalid_seqid.csv](data/samplesheets/invalid/RunManifest_invalid_runname.csv) | Invalid aviti sequencer ID |
 
 #### [Valid Samplesheets](data/samplesheets/valid)
 * [210917_NB551068_0409_AH3YNFAFX3_SampleSheet.csv](data/samplesheets/valid/210917_NB551068_0409_AH3YNFAFX3_SampleSheet.csv)
@@ -52,3 +54,4 @@ invalid.
 * [231012_M02631_0285_000000000-LBGMH_SampleSheet.csv](data/samplesheets/valid/231012_M02631_0285_000000000-LBGMH_SampleSheet.csv)
 * [231116_NB551068_0551_AHLCYNAFX5_SampleSheet.csv](data/samplesheets/valid/231116_NB551068_0551_AHLCYNAFX5_SampleSheet.csv)
 * [231201_NB552085_0291_AHVNWYAFX5_SampleSheet.csv](data/samplesheets/valid/231201_NB552085_0291_AHVNWYAFX5_SampleSheet.csv)
+* [RunManifest.csv](data/samplesheets/valid/RunManifest.csv)
