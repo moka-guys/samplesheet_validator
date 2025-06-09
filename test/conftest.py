@@ -18,6 +18,7 @@ def pytest_addoption(parser):
     parser.addoption("--tso_panels", action="store", type=str, required=True)
     parser.addoption("--dev_pannos", action="store", type=str, required=True)
     parser.addoption("--logdir", action="store", type=str, required=True)
+    parser.addoption("--runname", action="store", type=str, required=True)
 
 
 def pytest_configure(config):
@@ -32,7 +33,7 @@ def pytest_configure(config):
     os.environ["samplesheet_dir"] = f'{os.path.join(data_dir, "samplesheets")}'
     # Temporary directories to copy test files into and to contain outputs
     os.environ["temp_dir"] = tempdir
-
+    os.environ["runname"] = config.getoption("runname")
 
 @pytest.fixture(scope="function", autouse=True)
 def run_before_and_after_tests():

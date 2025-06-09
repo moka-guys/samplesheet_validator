@@ -45,6 +45,8 @@ class SamplesheetCheck:
         runfolder_name (str):           Name of runfolder
         logfile_path (str):             Path to use for logfile
         logger (logging.Logger):        Logger
+        illumina(bool)                  Type of seqencing instrument (Illumina or Aviti)
+        runname(str)                    Name of processed run folder
 
     Methods:
         get_logger()
@@ -82,6 +84,11 @@ class SamplesheetCheck:
             Assigns self.tso as True if TSO run
         log_summary()
             Write summary of validator outcome to log
+        get_aviti_run_folder_name()
+            Get the aviti run folder name from the sample sheet content
+        check_aviti_run_folder_name()
+            Check if the run folder name extracted from samplesheet matches with 
+            actual Aviti run folder name provided in the args
     """
 
     def __init__(
@@ -92,6 +99,8 @@ class SamplesheetCheck:
         tso_panels: list,
         dev_pannos: list,
         logdir: str,
+        illumina: bool,
+        runname: str
     ):
         """
         Constructor for the SamplesheetCheck class
@@ -101,6 +110,8 @@ class SamplesheetCheck:
             :param tso_panels (list):           TSO500 pan numbers
             :param dev_pannos (list):           Development pan numbers
             :param logdir (str):                Log file directory
+            :param illumina(bool):              Illumina or not
+            :param runname (str):               Processed run folder name
         """
         self.samplesheet_path = samplesheet_path
         self.logdir = logdir
@@ -113,14 +124,23 @@ class SamplesheetCheck:
         self.errors_dict = {}
         self.data_headers = []  # Populate with headers from data section
         self.missing_headers = []  # Populate with missing headers
-        self.expected_data_headers = ["Sample_ID", "Sample_Name", "index"]
+        self.illumina = illumina      
+        self.runname = runname
+        if self.illumina:
+            self.expected_data_headers = ["Sample_ID", "Sample_Name", "index"]
+        else:
+            self.expected_data_headers = ["# Fill in the correct sample schema associated with "
+                                          "the Freestyle Workflow for all sequenced samples. "]
         self.sequencer_ids = sequencer_ids
         self.panels = panels
         self.tso_panels = tso_panels
         self.dev_pannos = dev_pannos
-        self.runfolder_name = (self.samplesheet_path.split("/")[-1]).split(
-            "_SampleSheet.csv"
-        )[0]
+        if self.illumina:
+            self.runfolder_name = (self.samplesheet_path.split("/")[-1]).split(
+                "_SampleSheet.csv"
+            )[0]
+        else:
+            self.runfolder_name = self.runname
         self.logfile_path = (
             f"{os.path.join(logdir, self.runfolder_name)}_samplesheet_validator.log"
         )
@@ -139,16 +159,20 @@ class SamplesheetCheck:
         checks not included in seglh-naming
         """
         if self.check_ss_present():
-            setattr(self, "ss_obj", self.check_ss_name())
-            if self.ss_obj:
+            if self.illumina: # if illumina, check if the ss name follows the convenction
+                setattr(self, "ss_obj", self.check_ss_name())
+            else: # if aviti, check if the run folder name matches
+                self.get_aviti_run_folder_name()
+                self.check_run_folder_name()
+            if self.ss_obj or not self.illumina:
                 self.check_sequencer_id()
                 if self.check_ss_contents():
                     self.get_data_section()
                     if not self.development_run():
-                        self.check_expected_headers()
+                        self.check_expected_headers() # not essential for aviti
                         # Check sample id or sample name columns are not missing before
                         # doing sample validation
-                        self.comp_samplenameid()
+                        self.comp_samplenameid() # not essential for aviti
                         for (
                             column,
                             samples,
@@ -243,20 +267,26 @@ class SamplesheetCheck:
 
     def check_sequencer_id(self) -> None:
         """
-        Check element 2 of samplesheet (sequencer name matches list of
-        allowed names in self.sequencer_ids)
+        For Illumina, check element 2 of samplesheet (sequencer name matches list of
+        allowed names in self.sequencer_ids). For Aviti, check the sequencer name 
+        extracted from the sample sheet content matches list of allowed names in 
+        self.sequencer_ids
             :return None:
         """
-        if self.ss_obj.sequencerid not in self.sequencer_ids:
+        if self.illumina:
+            seq_to_check = self.ss_obj.sequencerid
+        else:
+            seq_to_check = self.aviti_seq_id
+        if seq_to_check not in self.sequencer_ids:
             self.errors = True
             self.add_msg_to_error_dict(
                 "Sequencer ID invalid",
                 self.logger.log_msgs["sequencer_id_invalid"]
-                % (self.ss_obj, self.ss_obj.sequencerid),
+                % (self.ss_obj, seq_to_check),
             )
             self.logger.warning(
                 self.logger.log_msgs["sequencer_id_invalid"]
-                % (self.ss_obj, self.ss_obj.sequencerid)
+                % (self.ss_obj, seq_to_check)
             )
         else:
             self.logger.info(self.logger.log_msgs["sequencer_id_valid"])
@@ -297,6 +327,11 @@ class SamplesheetCheck:
                     pass  # Skip empty lines
                 else:  # Contains sample
                     self.extract_sample_name_id(line, line_index)
+
+        # if aviti, take sample ID as sample name also
+        # since aviti only has sample ID col, not sample name
+        if not self.illumina: 
+            self.samples["Sample_Name"] = self.samples["Sample_ID"]
 
     def extract_headers(self, line: str, line_index: int) -> None:
         """
@@ -492,3 +527,32 @@ class SamplesheetCheck:
             self.logger.info(
                 self.logger.log_msgs["sschecks_passed"], self.samplesheet_path
             )
+    
+    def get_aviti_run_folder_name(self) -> str:
+        """
+        Obtain RunName inserted in samplesheet to check samplesheet has correct name given and
+        aviti sequencer id from the samplesheet name to assign to object
+            :return None
+        """
+        with open(self.samplesheet_path, "r") as ss_file:
+            ss_file_contents = ss_file.readlines()
+            run_name = ss_file_contents[2]
+            run_name = run_name.split(",", 1)[1].split(",", 1)[0]
+            self.aviti_seq_id = (self.samplesheet_path.split("/")[-1]).split("_")[1]
+            self.ss_runname = run_name
+    
+    def check_run_folder_name(self) -> None:
+        """
+        Check if the run folder name extracted from aviti sample sheet 
+        matches the processed run folder  
+            :return None:      
+        """
+        if not self.runfolder_name.split("_")[-1] == self.ss_runname:
+            self.errors = True
+            self.add_msg_to_error_dict(
+                "Aviti not match",
+                self.logger.log_msgs["Aviti not match"] % (self.runname)
+            )
+            self.logger.warning(self.logger.log_msgs["Aviti not match"], self.runname)
+        else:
+            self.logger.info(self.logger.log_msgs["Aviti match"], self.runname)
