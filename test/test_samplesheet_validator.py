@@ -35,6 +35,7 @@ def get_sscheck_obj(samplesheet: str) -> object:
         os.getenv("sequencer_ids").split(","),
         os.getenv("panels").split(","),
         os.getenv("tso_panels").split(","),
+        os.getenv("okd_panels").split(","),
         os.getenv("dev_pannos").split(","),
         os.getenv("temp_dir"),
         True,
@@ -55,6 +56,7 @@ def get_sscheck_aviti_obj(samplesheet: str) -> object:
         os.getenv("sequencer_ids").split(","),
         os.getenv("panels").split(","),
         os.getenv("tso_panels").split(","),
+        os.getenv("okd_panels").split(","),
         os.getenv("dev_pannos").split(","),
         os.getenv("temp_dir"),
         False,
@@ -140,6 +142,7 @@ def valid_tso_samplesheet():
         )
     ]
 
+# TODO add valid OKD samplesheet
 
 @pytest.fixture(scope="function")
 def valid_wes_samplesheet():
@@ -983,7 +986,7 @@ class TestSamplesheetCheck(object):
         for samplesheet in valid_samplesheets_with_dev:
             sscheck_obj = get_sscheck_obj(samplesheet)
             assert not sscheck_obj.errors
-            assert "Samplesheet is (>10 bytes)" in caplog.text
+            assert "is (>10 bytes)" in caplog.text
             assert "WARNING" not in caplog.text
             shutdown_logs(sscheck_obj.logger)
 
@@ -994,7 +997,7 @@ class TestSamplesheetCheck(object):
         for samplesheet in empty_file:
             sscheck_obj = get_sscheck_obj(samplesheet)
             assert sscheck_obj.errors
-            assert "Samplesheet empty (<10 bytes)" in caplog.text
+            assert "is empty (<10 bytes)" in caplog.text
             assert "WARNING" in caplog.text
             shutdown_logs(sscheck_obj.logger)
 
