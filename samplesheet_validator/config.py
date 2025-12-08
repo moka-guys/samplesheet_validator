@@ -39,6 +39,7 @@ LOG_MSGS = {
     "not_okd_run": "Samplesheet is not for a OKD run",
     "masterdata_present": "Matching MasterDataFile with supplied name exists (%s)",
     "masterdata_absent": "MasterDataFile with supplied name does not exist (%s)",
+    "masterdata_not_provided": "Path to MasterDataFile not provided and could not be validated",
     "sschecks_not_passed": "Samplesheet did not pass checks: %s",
     "sschecks_passed": "Samplesheet passed all checks %s",
     "Aviti match": "The run name from sample sheet matches Aviti run %s",
