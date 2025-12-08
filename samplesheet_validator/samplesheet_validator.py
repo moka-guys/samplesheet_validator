@@ -198,8 +198,7 @@ class SamplesheetCheck:
                                     self.check_pannos(sample, column, sample_obj)
                         self.check_tso()
                         if self.check_okd():
-                            if self.check_md_file():
-                                self.check_file_contents(self.masterdata_path)
+                            self.check_md_file()
 
         self.log_summary()
 
@@ -533,7 +532,7 @@ class SamplesheetCheck:
         else:
             self.logger.info(self.logger.log_msgs["not_tso_run"])
 
-    def check_okd(self) -> None:
+    def check_okd(self) -> Union[bool, None]:
         """
         Assigns self.okd as True if OKD run
             : return None:
@@ -541,6 +540,7 @@ class SamplesheetCheck:
         if set(self.pannumbers).intersection(set(self.okd_panels)):
             self.logger.info(self.logger.log_msgs["okd_run"])
             self.okd = True
+            return True
         else:
             self.logger.info(self.logger.log_msgs["not_okd_run"])
 
@@ -554,22 +554,25 @@ class SamplesheetCheck:
 
         """
         if not self.masterdata_path:
-            raise ValueError("MasterDataFile path not provided but is required for OKD runs")
-        
+            self.logger.info(
+                self.logger.log_msgs["masterdata_not_provided"]
+            )
         if os.path.isfile(self.masterdata_path):
-            if self.ss_obj.name.removesuffix("_SampleSheet.csv") == os.path.basename(
+            if os.path.basename(
+                self.samplesheet_path.removesuffix("_SampleSheet.csv")
+            ) == os.path.basename(
                 self.masterdata_path
             ).removesuffix("_MasterDataFile.xlsx"):
                 self.logger.info(self.logger.log_msgs["masterdata_present"], self.masterdata_path)
                 return True
         else:
             self.logger.warning(
-                self.logger.log_msgs["masterdatefile_absent"], self.masterdata_path
+                self.logger.log_msgs["masterdata_absent"], self.masterdata_path
             )
             self.errors = True
             self.add_msg_to_error_dict(
                 "MasterDataFile absent",
-                self.logger.log_msgs["masterdatefile_absent"] % self.masterdata_path,
+                self.logger.log_msgs["masterdata_absent"] % self.masterdata_path,
             )
 
     def log_summary(self) -> None:
