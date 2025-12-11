@@ -553,27 +553,33 @@ class SamplesheetCheck:
             :return True | None:    True if samplesheet exists, else None
 
         """
-        if not self.masterdata_path:
-            self.logger.info(
-                self.logger.log_msgs["masterdata_not_provided"]
-            )
-        if os.path.isfile(self.masterdata_path):
-            if os.path.basename(
-                self.samplesheet_path.removesuffix("_SampleSheet.csv")
-            ) == os.path.basename(
-                self.masterdata_path
-            ).removesuffix("_MasterDataFile.xlsx"):
-                self.logger.info(self.logger.log_msgs["masterdata_present"], self.masterdata_path)
-                return True
-        else:
+        if (self.masterdata_path == None) or (self.masterdata_path == ""):
             self.logger.warning(
-                self.logger.log_msgs["masterdata_absent"], self.masterdata_path
+                self.logger.log_msgs["masterdata_not_provided"]
             )
             self.errors = True
             self.add_msg_to_error_dict(
-                "MasterDataFile absent",
-                self.logger.log_msgs["masterdata_absent"] % self.masterdata_path,
+                "MasterDataFile not provided",
+                self.logger.log_msgs["masterdata_not_provided"],
             )
+        else:
+            if os.path.isfile(self.masterdata_path):
+                if os.path.basename(
+                    self.samplesheet_path.removesuffix("_SampleSheet.csv")
+                ) == os.path.basename(
+                    self.masterdata_path
+                ).removesuffix("_MasterDataFile.xlsx"):
+                    self.logger.info(self.logger.log_msgs["masterdata_present"], self.masterdata_path)
+                    return True
+            else:
+                self.logger.warning(
+                    self.logger.log_msgs["masterdata_absent"], self.masterdata_path
+                )
+                self.errors = True
+                self.add_msg_to_error_dict(
+                    "MasterDataFile absent",
+                    self.logger.log_msgs["masterdata_absent"] % self.masterdata_path,
+                )
 
     def log_summary(self) -> None:
         """

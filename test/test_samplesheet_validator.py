@@ -766,6 +766,20 @@ def no_MD_file():
         )
     }
 
+@pytest.fixture(scope="function")
+def MD_file_not_provided():
+    """
+    OKD Samplesheet for which MasterDateFile Path was not provided
+    """
+    base_dir = os.getenv("samplesheet_dir")
+
+    return {
+        os.path.join(
+            base_dir, "invalid",
+            "251127_A01229_0639_AHGLV2DRX7_SampleSheet.csv",
+        ): ""
+    }
+
 
 @pytest.fixture(scope="function")
 def ss_with_disallowed_sserrs(
@@ -1241,6 +1255,18 @@ class TestSamplesheetCheck(object):
             assert "WARNING" not in caplog.text
             shutdown_logs(sscheck_obj.logger)
 
+    def test_MD_not_provided(self, MD_file_not_provided, caplog):
+        """
+        Test function is able to correctly identify that path for MasterDataFile was
+        not provided.
+        """
+        for samplesheet, mdf in MD_file_not_provided.items():
+            sscheck_obj = get_sscheck_obj(samplesheet, mdf)
+            assert sscheck_obj.okd
+            assert "Path to MasterDataFile not provided and could not be validated" in caplog.text
+            assert "WARNING" in caplog.text
+            shutdown_logs(sscheck_obj.logger)
+
     def test_valid_MD_present(self, valid_okd_samplesheet, caplog):
         """
         Test function is able to correctly identify that a matching MasterDataFile
@@ -1255,7 +1281,7 @@ class TestSamplesheetCheck(object):
 
     def test_MD_absent(self, no_MD_file, caplog):
         """
-        Test function is able to correctly identify that samples are not OKD
+        Test function is able to correctly identify that MasterDataFile is absent
         """
         for samplesheet, mdf in no_MD_file.items():
             sscheck_obj = get_sscheck_obj(samplesheet, mdf)
