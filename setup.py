@@ -3,8 +3,7 @@ from samplesheet_validator.git_tag import git_tag
 
 setup(
     name="samplesheet_validator",
-    #version=git_tag(),
-    version="1.5.0",
+    version=git_tag(),
     description="Python library for samplesheet validation",
     url="https://github.com/moka-guys/samplesheet_validator",
     author="Rachel Duffin",
