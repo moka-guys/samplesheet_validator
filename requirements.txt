@@ -1,5 +1,5 @@
 git+https://github.com/moka-guys/seglh-naming@v1.0.4
-setuptools==58.2.0
+setuptools==80.9.0
 coverage==7.5.4
 pytest==9.0.2
 flake8==6.1.0
