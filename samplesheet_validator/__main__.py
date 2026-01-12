@@ -28,14 +28,6 @@ def get_arguments():
         help="Path to samplesheet requiring validation",
     )
     parser.add_argument(
-        "-M",
-        "--masterdata_path",
-        type=lambda x: is_valid_file(parser, x),
-        required=False,
-        default=None,
-        help="Path to MasterDateFile requiring validation. OKD runs only"
-    )
-    parser.add_argument(
         "-SI",
         "--sequencer_ids",
         type=lambda s: [i for i in s.split(',')],
@@ -131,7 +123,6 @@ if __name__ == "__main__":
         ILLUMINA = False
     sscheck_obj = SamplesheetCheck(
         parsed_args.samplesheet_path,
-        parsed_args.masterdata_path,
         parsed_args.sequencer_ids,
         parsed_args.panels,
         parsed_args.tso_panels,

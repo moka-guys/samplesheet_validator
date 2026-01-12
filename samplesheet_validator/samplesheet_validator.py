@@ -26,7 +26,6 @@ class SamplesheetCheck:
 
     Attributes:
         samplesheet_path (str):         Path to samplesheet
-        masterdata_path (str):          Path to MasterDataFile
         logdir (str):                   Log file directory
         logger (obj):                   Logger object
         ss_obj (False | obj):           seglh-naming samplesheet object
@@ -108,13 +107,11 @@ class SamplesheetCheck:
         dev_pannos: list,
         logdir: str,
         illumina: bool,
-        runname: str,
-        masterdata_path: str | None = None
+        runname: str
     ):
         """
         Constructor for the SamplesheetCheck class
             :param samplesheet_path (str):      Path to samplesheet
-            :param masterdata_path (str):       Path to MasterDataFile
             :param sequencer_ids (list):        Allowed sequencer IDs
             :param panels (list):               Allowed pan numbers
             :param tso_panels (list):           TSO500 pan numbers
@@ -125,7 +122,6 @@ class SamplesheetCheck:
             :param runname (str):               Processed run folder name
         """
         self.samplesheet_path = samplesheet_path
-        self.masterdata_path = masterdata_path
         self.logdir = logdir
         self.ss_obj = False
         self.pannumbers = []
@@ -197,8 +193,7 @@ class SamplesheetCheck:
                                 if sample_obj:
                                     self.check_pannos(sample, column, sample_obj)
                         self.check_tso()
-                        if self.check_okd():
-                            self.check_md_file()
+                        self.check_okd()
 
         self.log_summary()
 
@@ -543,43 +538,6 @@ class SamplesheetCheck:
             return True
         else:
             self.logger.info(self.logger.log_msgs["not_okd_run"])
-
-
-    def check_md_file(self) -> Union[bool, None]:
-        """
-        Checks whether matching MasterDateFile is present for OKD runs and
-        matches naming of the SampleSheet
-        If samplesheet present returns true, else returns false.
-            :return True | None:    True if samplesheet exists, else None
-
-        """
-        if (self.masterdata_path == None) or (self.masterdata_path == ""):
-            self.logger.warning(
-                self.logger.log_msgs["masterdata_not_provided"]
-            )
-            self.errors = True
-            self.add_msg_to_error_dict(
-                "MasterDataFile not provided",
-                self.logger.log_msgs["masterdata_not_provided"],
-            )
-        else:
-            if os.path.isfile(self.masterdata_path):
-                if os.path.basename(
-                    self.samplesheet_path.removesuffix("_SampleSheet.csv")
-                ) == os.path.basename(
-                    self.masterdata_path
-                ).removesuffix("_MasterDataFile.xlsx"):
-                    self.logger.info(self.logger.log_msgs["masterdata_present"], self.masterdata_path)
-                    return True
-            else:
-                self.logger.warning(
-                    self.logger.log_msgs["masterdata_absent"], self.masterdata_path
-                )
-                self.errors = True
-                self.add_msg_to_error_dict(
-                    "MasterDataFile absent",
-                    self.logger.log_msgs["masterdata_absent"] % self.masterdata_path,
-                )
 
     def log_summary(self) -> None:
         """

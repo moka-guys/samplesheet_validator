@@ -23,11 +23,12 @@ def shutdown_logs(logger: object) -> None:
         handler.close()
 
 
-def get_sscheck_obj(samplesheet: str, mdfile: str | None = None) -> object:
+def get_sscheck_obj(samplesheet: str) -> object:
     """
     Function to retrieve a samplesheet check object and carry out the
     samplesheet checks for a supplied samplesheet in illumina run
-        :param samplesheet (str):       Samplesheet path
+        :param samplesheet (str):        Samplesheet path
+        :param mdfile (str)              MasterDataFile Path
         :return sscheck_obj (object):    SamplesheetCheck object
     """
     sscheck_obj = samplesheet_validator.SamplesheetCheck(
@@ -39,13 +40,12 @@ def get_sscheck_obj(samplesheet: str, mdfile: str | None = None) -> object:
         os.getenv("dev_pannos").split(","),
         os.getenv("temp_dir"),
         True,
-        os.getenv("runname"),
-        mdfile
+        os.getenv("runname")
     )
     sscheck_obj.ss_checks()
     return sscheck_obj
 
-def get_sscheck_aviti_obj(samplesheet: str, mdfile: str | None = None) -> object:
+def get_sscheck_aviti_obj(samplesheet: str) -> object:
     """
     Function to retrieve a samplesheet check object and carry out the
     samplesheet checks for a supplied samplesheet in aviti run
@@ -61,8 +61,7 @@ def get_sscheck_aviti_obj(samplesheet: str, mdfile: str | None = None) -> object
         os.getenv("dev_pannos").split(","),
         os.getenv("temp_dir"),
         False,
-        os.getenv("runname"),
-        mdfile
+        os.getenv("runname")
     )
     sscheck_obj.ss_checks()
     return sscheck_obj
@@ -149,17 +148,14 @@ def valid_okd_samplesheet():
     """
     Valid OKD samplesheets
     """
-    base_dir = os.getenv("samplesheet_dir")
 
-    return {
+    return [
         os.path.join(
-            base_dir, "valid",
-            "251127_A01229_0637_AHGLV2DRX7_SampleSheet.csv",
-        ): os.path.join(
-            base_dir, "valid",
-            "251127_A01229_0637_AHGLV2DRX7_MasterDataFile.xlsx",
+            os.getenv("samplesheet_dir"),
+            "valid",
+            "251127_A01229_0637_AHGLV2DRX7_SampleSheet.csv"
         )
-    }
+    ]
 
 @pytest.fixture(scope="function")
 def valid_wes_samplesheet():
@@ -211,6 +207,7 @@ def valid_samplesheets_no_dev(
     valid_wes_samplesheet,
     valid_adx_samplesheet,
     valid_snp_samplesheet,
+    valid_okd_samplesheet
 ):
     """
     Test cases with valid paths, files are populated, and valid samplesheet names, and
@@ -225,6 +222,7 @@ def valid_samplesheets_no_dev(
             valid_wes_samplesheet,
             valid_adx_samplesheet,
             valid_snp_samplesheet,
+            valid_okd_samplesheet
         )
     )
 
@@ -749,37 +747,6 @@ def samplesheets_fail_parsing():
         )
     ]
 
-@pytest.fixture(scope="function")
-def no_MD_file():
-    """
-    OKD Samplesheet without matching MasterDateFile
-    """
-    base_dir = os.getenv("samplesheet_dir")
-
-    return {
-        os.path.join(
-            base_dir, "invalid",
-            "251127_A01229_0639_AHGLV2DRX7_SampleSheet.csv",
-        ): os.path.join(
-            base_dir, "invalid",
-            "251127_A01229_0639_AHGLV2DRX7_MasterDataFile.xlsx",
-        )
-    }
-
-@pytest.fixture(scope="function")
-def MD_file_not_provided():
-    """
-    OKD Samplesheet for which MasterDateFile Path was not provided
-    """
-    base_dir = os.getenv("samplesheet_dir")
-
-    return {
-        os.path.join(
-            base_dir, "invalid",
-            "251127_A01229_0639_AHGLV2DRX7_SampleSheet.csv",
-        ): ""
-    }
-
 
 @pytest.fixture(scope="function")
 def ss_with_disallowed_sserrs(
@@ -1237,8 +1204,8 @@ class TestSamplesheetCheck(object):
         """
         Test function is able to correctly identify that samples are OKD
         """
-        for samplesheet, mdf in valid_okd_samplesheet.items():
-            sscheck_obj = get_sscheck_obj(samplesheet, mdf)
+        for samplesheet in valid_okd_samplesheet:
+            sscheck_obj = get_sscheck_obj(samplesheet)
             assert sscheck_obj.okd
             assert "Samplesheet is for a OKD run" in caplog.text
             assert "WARNING" not in caplog.text
@@ -1253,41 +1220,6 @@ class TestSamplesheetCheck(object):
             assert not sscheck_obj.okd
             assert "Samplesheet is not for a OKD run" in caplog.text
             assert "WARNING" not in caplog.text
-            shutdown_logs(sscheck_obj.logger)
-
-    def test_MD_not_provided(self, MD_file_not_provided, caplog):
-        """
-        Test function is able to correctly identify that path for MasterDataFile was
-        not provided.
-        """
-        for samplesheet, mdf in MD_file_not_provided.items():
-            sscheck_obj = get_sscheck_obj(samplesheet, mdf)
-            assert sscheck_obj.okd
-            assert "Path to MasterDataFile not provided and could not be validated" in caplog.text
-            assert "WARNING" in caplog.text
-            shutdown_logs(sscheck_obj.logger)
-
-    def test_valid_MD_present(self, valid_okd_samplesheet, caplog):
-        """
-        Test function is able to correctly identify that a matching MasterDataFile
-        is present for OKD run
-        """
-        for samplesheet, mdf in valid_okd_samplesheet.items():
-            sscheck_obj = get_sscheck_obj(samplesheet, mdf)
-            assert sscheck_obj.okd
-            assert "Matching MasterDataFile with supplied name exists" in caplog.text
-            assert "WARNING" not in caplog.text
-            shutdown_logs(sscheck_obj.logger)
-
-    def test_MD_absent(self, no_MD_file, caplog):
-        """
-        Test function is able to correctly identify that MasterDataFile is absent
-        """
-        for samplesheet, mdf in no_MD_file.items():
-            sscheck_obj = get_sscheck_obj(samplesheet, mdf)
-            assert sscheck_obj.okd
-            assert "MasterDataFile with supplied name does not exist" in caplog.text
-            assert "WARNING" in caplog.text
             shutdown_logs(sscheck_obj.logger)
 
     def test_log_summary_noerrors(self, valid_samplesheets_with_dev, caplog):
