@@ -16,6 +16,7 @@ def pytest_addoption(parser):
     parser.addoption("--sequencer_ids", action="store", type=str, required=True)
     parser.addoption("--panels", action="store", type=str, required=True)
     parser.addoption("--tso_panels", action="store", type=str, required=True)
+    parser.addoption("--okd_panels", action="store", type=str, required=True)
     parser.addoption("--dev_pannos", action="store", type=str, required=True)
     parser.addoption("--logdir", action="store", type=str, required=True)
     parser.addoption("--runname", action="store", type=str, required=True)
@@ -28,6 +29,7 @@ def pytest_configure(config):
     os.environ["sequencer_ids"] = config.getoption("sequencer_ids")
     os.environ["panels"] = config.getoption("panels")
     os.environ["tso_panels"] = config.getoption("tso_panels")
+    os.environ["okd_panels"] = config.getoption("okd_panels")
     os.environ["dev_pannos"] = config.getoption("dev_pannos")
     data_dir = os.path.abspath("test/data/")
     os.environ["samplesheet_dir"] = f'{os.path.join(data_dir, "samplesheets")}'

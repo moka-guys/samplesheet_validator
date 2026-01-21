@@ -1,66 +1,94 @@
 # Samplesheet Validator
 
-Checks sample sheet naming and contents. Carries out a series of checks on the sample sheet and collects any errors 
-that it identifies (SamplesheetCheck.errors_list). It also identifies whether or not a run is a TSO run from the sample 
-sheet (SamplesheetCheck.tso).
+This tool is designed to validate NGS samplesheets prior to downstream processing by performing a series of checks.
+
+It can be used as a standalone process but was designed for integration into automated workflows through instantiation of the SamplesheetCheck class, which records validation outcome in a boolean flag Attribute (self.errors) and errors in a dict (self.errors_dict).
+
+## Use case
+
+The tool has been designed for:
+1. Illumina sequencing runs with Samplesheets expected to end in "_SampleSheet.csv".
+2. AVITI runs.
+
+Expect run types include:
+1. Panel based NGS testing
+2. TSO500
+3. Oncodeep
+4. Archer
+5. MSK
+
+**Please note** this tool has been specifically designed for the Genome Informatics Service at Synnovis (including the use of the [seglh-naming](https://github.com/moka-guys/seglh-naming/) library) and therefore might require modifications for integration into alternative workflows.
+
 
 ## Protocol
 
-Runs a series of checks on the sample sheet, collects any errors identified. Checks whether: 
-* Sample sheet exists
-* Samplesheet name is valid for Illumina sample sheet (validates using the [seglh-naming](https://github.com/moka-guys/seglh-naming/) library)
-* Aviti run name from the sample sheet matches with the actual processed run folder name for Aviti sample sheet
-* Sequencer ID is in the list of allowed sequencer IDs supplied to the script
-* Samplesheet is not empty (>10 bytes)
-* Samplesheet is for a development run, using the development pan number supplied to the script
-* Samplesheet contains the minimum expected `[Data]` section headers: `Sample_ID, Sample_Name, index` for Illumina
-* `Sample_ID` and `Sample_Name` match for each sample in the data section of the samplesheet
-* Sample name does not contain any illegal characters
-* Sample name is valid (validates using the [seglh-naming](https://github.com/moka-guys/seglh-naming/) library)
-* Pan numbers are in the list of allowed pan numbers supplied to the script
-* Samplesheet contains any TSO samples
+Samplesheet validation is carried out in a series of consecutive steps with any errors identified recorded in the log file as per the [config file](samplesheet_validator/config.py).
 
-If samplesheet contains an input dev_pannos, the package will skip samplesheet checks for the samplesheet.
+Checks:
+1. Samplesheet path provided is valid.
+2. Samplesheet matches expected naming:
+    - Illumina: checked against[seglh-naming](https://github.com/moka-guys/seglh-naming/) library
+    - AVITI: samplesheet name matches run folder name.
+3. The sequencer_id is in the allowed/validated list of sequencers for that run type.
+4. The samplesheet is not empty (>10 bytes)
+5. If the run is a development run. **N.B.** If the run is a dev run no further samplesheet validation is performed. Further checks are only carried out for clinical runs.
+6. Samplesheet contains the minimum expected section headers
+7. Content in columns "Sample_ID" and "Sample_Name" match for each sample in the samplesheet
+8. Samplesheet doesn't contain any illegal characters
+9. Sample name matches expected naming convention for all samples. Assessed against [seglh-naming](https://github.com/moka-guys/seglh-naming/) library.
+10. The test code (pannumber) for each sample is in the list of expected test codes for the run type.
+11. Whether any TSO samples have been included on the run - Sets Boolean Attribute to true
+12. Whether any OKD samples are included on the run - Sets Boolean Attribute to true
 
-## Usage
 
-### Python package
+## Installation & Usage
 
-The repository provides a python package which can be installed with:
+### From Python package
 
-`python3 setup.py install`
+1. Clone a copy of the repository locally
 
-NB: Use the --user flag or install into an virtualenv/pipenv if not installing globally.
+    `git clone https://github.com/moka-guys/samplesheet_validator.git`
 
-```python
+2. cd in to the project root directory
 
-from samplesheet_validator.samplesheet_validator import SamplesheetCheck
+3. Install from python package
 
-sscheck_obj = SamplesheetCheck(
-    samplesheet_path,  # str
-    sequencer_ids,  # list
-    panels,  # list
-    tso_panels,  # list
-    dev_pannos,  # list
-    logdir,  # str
-    illumina, # bool
-    runname, # str
-)
-sscheck_obj.ss_checks()  # Carry out samplesheeet validation
+    `python3 setup.py install`
 
-print(sscheck_obj.errors_dict)  # View the dictionary of error messages
-```
+    NB's: Requires setuptools to be installed; Use the --user flag or install into an virtualenv/pipenv if not installing globally.
+
+4. Execute functionality from within a python script.
+
+    ```python
+
+    from samplesheet_validator.samplesheet_validator import SamplesheetCheck
+
+    sscheck_obj = SamplesheetCheck(
+        samplesheet_path,  # str
+        sequencer_ids,  # list
+        panels,  # list
+        tso_panels,  # list
+        okd_panels, # list
+        dev_pannos,  # list
+        logdir,  # str
+        illumina, # bool
+        runname, # str
+    )
+    sscheck_obj.ss_checks()  # Carry out samplesheeet validation
+
+    print(sscheck_obj.errors_dict)  # View the dictionary of error messages
+    ```
 
 ### Command line
 
-The environment must be set up as follows:
+To use the validator from the command line set up an environment as below:
 ```bash
 python3 -m venv venv
 source venv/bin/activate
 pip3 install -r requirements.txt
 ```
 
-The script can then be used as follows:
+The script can then be executed as follows:
 ```bash
 usage: Used to validate a samplesheet using the seglh-naming conventions
 
@@ -76,21 +104,23 @@ options:
                         Comma separated string of allowed panel numbers
   -T TSO_PANELS, --tso_panels TSO_PANELS
                         Comma separated string of tso panels
+  -O OKD_PANELS, --okd_panels OKD_PANELS
+                        Comma separated string of okd panels
   -D DEV_PANNOS, --dev_pannos DEV_PANNOS
                         Comma separated development pan numbers
   -L LOGDIR, --logdir LOGDIR
                         Directory to save the output logfile to
   -NSH NO_STREAM_HANDLER, --no_stream_handler NO_STRAM_HANDLER
-                        Provide flag when we don't want a stream handler (prevents
+                        Provide flag when we dont want a stream handler (prevents
                         duplication of log messages to terminal if using another
                         logging instance)
   -R RUN_FOLDER_NAME, --runname RUN_FOLDER_NAME
                         Str for processed folder name
 ```
 
-### Testing
+## Testing
 
-This repository currently has **92% test coverage**.
+This repository currently has **93% test coverage**.
 
 Test datasets are stored in [/test/data](../test/data). The script has a full test suite:
 * [test_samplesheet_validator.py](../test/test_samplesheet_validator.py)
@@ -102,8 +132,7 @@ These tests should be run before pushing any code to ensure all tests in the Git
 ```bash
 python3 -m pytest
 ```
-**N.B. Tests and test cases/files MUST be maintained and updated accordingly in conjunction with script development**
-**N.B. This includes ensuring that the arguments passed to pytest in the [pytest.ini](pytest.ini) file are kept up to date**
+**N.B. Tests and test cases/files MUST be maintained and updated accordingly in conjunction with script development. This includes ensuring that the arguments passed to pytest in the [pytest.ini](pytest.ini) file are kept up to date**
 
 
 ## Logging

@@ -49,6 +49,13 @@ def get_arguments():
         help="Comma separated string of tso panels",
     )
     parser.add_argument(
+        "-O",
+        "--okd_panels",
+        type=lambda s: [i for i in s.split(',')],
+        required=True,
+        help="Comma separated string of allowed okd numbers",
+    )
+    parser.add_argument(
         "-D",
         "--dev_pannos",
         type=lambda s: [i for i in s.split(',')],
@@ -76,7 +83,7 @@ def get_arguments():
         "-R",
         "--runname",
         required=True,
-        help="Aviti run folder name",
+        help="Run folder name",
     )
     return parser.parse_args()
 
@@ -119,6 +126,7 @@ if __name__ == "__main__":
         parsed_args.sequencer_ids,
         parsed_args.panels,
         parsed_args.tso_panels,
+        parsed_args.okd_panels,
         parsed_args.dev_pannos,
         parsed_args.logdir,
         ILLUMINA,

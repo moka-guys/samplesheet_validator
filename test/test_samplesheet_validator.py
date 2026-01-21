@@ -27,7 +27,8 @@ def get_sscheck_obj(samplesheet: str) -> object:
     """
     Function to retrieve a samplesheet check object and carry out the
     samplesheet checks for a supplied samplesheet in illumina run
-        :param samplesheet (str):       Samplesheet path
+        :param samplesheet (str):        Samplesheet path
+        :param mdfile (str)              MasterDataFile Path
         :return sscheck_obj (object):    SamplesheetCheck object
     """
     sscheck_obj = samplesheet_validator.SamplesheetCheck(
@@ -35,6 +36,7 @@ def get_sscheck_obj(samplesheet: str) -> object:
         os.getenv("sequencer_ids").split(","),
         os.getenv("panels").split(","),
         os.getenv("tso_panels").split(","),
+        os.getenv("okd_panels").split(","),
         os.getenv("dev_pannos").split(","),
         os.getenv("temp_dir"),
         True,
@@ -55,6 +57,7 @@ def get_sscheck_aviti_obj(samplesheet: str) -> object:
         os.getenv("sequencer_ids").split(","),
         os.getenv("panels").split(","),
         os.getenv("tso_panels").split(","),
+        os.getenv("okd_panels").split(","),
         os.getenv("dev_pannos").split(","),
         os.getenv("temp_dir"),
         False,
@@ -62,7 +65,6 @@ def get_sscheck_aviti_obj(samplesheet: str) -> object:
     )
     sscheck_obj.ss_checks()
     return sscheck_obj
-
 
 @pytest.fixture(scope="function")
 def valid_dirs():
@@ -142,6 +144,20 @@ def valid_tso_samplesheet():
 
 
 @pytest.fixture(scope="function")
+def valid_okd_samplesheet():
+    """
+    Valid OKD samplesheets
+    """
+
+    return [
+        os.path.join(
+            os.getenv("samplesheet_dir"),
+            "valid",
+            "251127_A01229_0637_AHGLV2DRX7_SampleSheet.csv"
+        )
+    ]
+
+@pytest.fixture(scope="function")
 def valid_wes_samplesheet():
     """
     Valid WES samplesheets
@@ -191,6 +207,7 @@ def valid_samplesheets_no_dev(
     valid_wes_samplesheet,
     valid_adx_samplesheet,
     valid_snp_samplesheet,
+    valid_okd_samplesheet
 ):
     """
     Test cases with valid paths, files are populated, and valid samplesheet names, and
@@ -205,6 +222,7 @@ def valid_samplesheets_no_dev(
             valid_wes_samplesheet,
             valid_adx_samplesheet,
             valid_snp_samplesheet,
+            valid_okd_samplesheet
         )
     )
 
@@ -242,6 +260,24 @@ def not_tso_samplesheet(
         )
     )
 
+@pytest.fixture(scope="function")
+def not_okd_samplesheet(
+    valid_custompanels_samplesheet,
+    valid_lrpcr_samplesheet,
+    valid_wes_samplesheet,
+    valid_adx_samplesheet,
+    valid_tso_samplesheet,
+):
+    """ """
+    return list(
+        itertools.chain(
+            valid_custompanels_samplesheet,
+            valid_lrpcr_samplesheet,
+            valid_wes_samplesheet,
+            valid_adx_samplesheet,
+            valid_tso_samplesheet,
+        )
+    )
 
 @pytest.fixture(scope="function")
 def invalid_paths():
@@ -737,7 +773,6 @@ def ss_with_disallowed_sserrs(
         )
     )
 
-
 @pytest.fixture(scope="function")
 def samplesheets_exist(
     valid_samplesheets_with_dev,
@@ -745,7 +780,7 @@ def samplesheets_exist(
     invalid_names,
     invalid_contents,
     invalid_internal_chars,
-    samplesheets_fail_parsing,
+    samplesheets_fail_parsing
 ):
     """
     Samplesheets that exist
@@ -983,7 +1018,7 @@ class TestSamplesheetCheck(object):
         for samplesheet in valid_samplesheets_with_dev:
             sscheck_obj = get_sscheck_obj(samplesheet)
             assert not sscheck_obj.errors
-            assert "Samplesheet is (>10 bytes)" in caplog.text
+            assert "is (>10 bytes)" in caplog.text
             assert "WARNING" not in caplog.text
             shutdown_logs(sscheck_obj.logger)
 
@@ -994,7 +1029,7 @@ class TestSamplesheetCheck(object):
         for samplesheet in empty_file:
             sscheck_obj = get_sscheck_obj(samplesheet)
             assert sscheck_obj.errors
-            assert "Samplesheet empty (<10 bytes)" in caplog.text
+            assert "is empty (<10 bytes)" in caplog.text
             assert "WARNING" in caplog.text
             shutdown_logs(sscheck_obj.logger)
 
@@ -1162,6 +1197,28 @@ class TestSamplesheetCheck(object):
             sscheck_obj = get_sscheck_obj(samplesheet)
             assert not sscheck_obj.tso
             assert "Samplesheet is not for a TSO run" in caplog.text
+            assert "WARNING" not in caplog.text
+            shutdown_logs(sscheck_obj.logger)
+
+    def test_check_okd_true(self, valid_okd_samplesheet, caplog):
+        """
+        Test function is able to correctly identify that samples are OKD
+        """
+        for samplesheet in valid_okd_samplesheet:
+            sscheck_obj = get_sscheck_obj(samplesheet)
+            assert sscheck_obj.okd
+            assert "Samplesheet is for a OKD run" in caplog.text
+            assert "WARNING" not in caplog.text
+            shutdown_logs(sscheck_obj.logger)
+
+    def test_check_okd_false(self, not_okd_samplesheet, caplog):
+        """
+        Test function is able to correctly identify that samples are not OKD
+        """
+        for samplesheet in not_okd_samplesheet:
+            sscheck_obj = get_sscheck_obj(samplesheet)
+            assert not sscheck_obj.okd
+            assert "Samplesheet is not for a OKD run" in caplog.text
             assert "WARNING" not in caplog.text
             shutdown_logs(sscheck_obj.logger)
 

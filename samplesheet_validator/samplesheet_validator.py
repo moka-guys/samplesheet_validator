@@ -32,6 +32,7 @@ class SamplesheetCheck:
         dev_run (bool):                 True if run is a development run, else False
         pannumbers (list):              Panel numbers in the sample sheet
         tso (bool):                     True if samplesheet contains any TSO samples
+        okd (bool):                     True if samplesheet contains any OKD samples
         samples (dict):                 Dictionary of sample IDs and sample names from the samplesheet
         errors (bool):                  True if samplesheet errors encountered, False if not
         errors_dict (dict):             Stores identifiers for any types of errors encountered
@@ -41,6 +42,7 @@ class SamplesheetCheck:
         sequencer_ids (list):           Valid sequencer IDs
         panels (list):                  Valid pan numbers
         tso_panels (list):              Valid TSO pannumbers
+        okd_panels (list):              Valid OKD pannumbers
         development_panels (list):      Development pan numbers
         runfolder_name (str):           Name of runfolder
         logfile_path (str):             Path to use for logfile
@@ -62,8 +64,8 @@ class SamplesheetCheck:
         check_sequencer_id()
             Check element 2 of samplesheet (sequencer name matches list of allowed names
             in self.sequencer_ids)
-        check_ss_contents()
-            Check samplesheet not empty (<10 bytes)
+        check_file_contents()
+            Checks that a file is not empty (<10 bytes)
         get_data_section()
             Parse data section of samplesheet from file
         development_run()
@@ -82,6 +84,10 @@ class SamplesheetCheck:
             Check sample names contain allowed pan numbers from self.panels number list
         check_tso()
             Assigns self.tso as True if TSO run
+        check_okd()
+            Assigns self.okd as True if OKD run
+        check_md_file()
+            Checks a matching MasterDateFile is present
         log_summary()
             Write summary of validator outcome to log
         get_aviti_run_folder_name()
@@ -97,6 +103,7 @@ class SamplesheetCheck:
         sequencer_ids: list,
         panels: list,
         tso_panels: list,
+        okd_panels: list,
         dev_pannos: list,
         logdir: str,
         illumina: bool,
@@ -108,6 +115,7 @@ class SamplesheetCheck:
             :param sequencer_ids (list):        Allowed sequencer IDs
             :param panels (list):               Allowed pan numbers
             :param tso_panels (list):           TSO500 pan numbers
+            :param okd_panels (list):           Oncodeep pan numbers
             :param dev_pannos (list):           Development pan numbers
             :param logdir (str):                Log file directory
             :param illumina(bool):              Illumina or not
@@ -118,6 +126,7 @@ class SamplesheetCheck:
         self.ss_obj = False
         self.pannumbers = []
         self.tso = False
+        self.okd = False
         # Store sample IDs and sample names from samplesheet
         self.samples = {"Sample_ID": [], "Sample_Name": []}
         self.errors = False  # Switches to True if samplesheet errors encountered
@@ -134,6 +143,7 @@ class SamplesheetCheck:
         self.sequencer_ids = sequencer_ids
         self.panels = panels
         self.tso_panels = tso_panels
+        self.okd_panels = okd_panels
         self.dev_pannos = dev_pannos
         if self.illumina:
             self.runfolder_name = (self.samplesheet_path.split("/")[-1]).split(
@@ -159,14 +169,14 @@ class SamplesheetCheck:
         checks not included in seglh-naming
         """
         if self.check_ss_present():
-            if self.illumina: # if illumina, check if the ss name follows the convenction
+            if self.illumina: # if illumina, check if the ss name follows the convention
                 setattr(self, "ss_obj", self.check_ss_name())
             else: # if aviti, check if the run folder name matches
                 self.get_aviti_run_folder_name()
                 self.check_run_folder_name()
             if self.ss_obj or not self.illumina:
                 self.check_sequencer_id()
-                if self.check_ss_contents():
+                if self.check_file_contents(self.samplesheet_path):
                     self.get_data_section()
                     if not self.development_run():
                         self.check_expected_headers() # not essential for aviti
@@ -183,6 +193,8 @@ class SamplesheetCheck:
                                 if sample_obj:
                                     self.check_pannos(sample, column, sample_obj)
                         self.check_tso()
+                        self.check_okd()
+
         self.log_summary()
 
     def check_ss_present(self) -> Union[bool, None]:
@@ -291,19 +303,20 @@ class SamplesheetCheck:
         else:
             self.logger.info(self.logger.log_msgs["sequencer_id_valid"])
 
-    def check_ss_contents(self) -> Union[bool, None]:
+    def check_file_contents(self, file) -> Union[bool, None]:
         """
-        Check samplesheet not empty (<10 bytes)
-            :return (True | None): True if samplesheet not empty, else None
+        Checks that a file is not empty (<10 bytes)
+            :return (True | None): True if file not empty, else None
         """
-        if os.stat(self.samplesheet_path).st_size < 10:
-            self.logger.warning(self.logger.log_msgs["ss_empty"])
+        if os.stat(file).st_size < 10:
+            self.logger.warning(self.logger.log_msgs[f"file_empty"], file)
             self.errors = True
             self.add_msg_to_error_dict(
-                "Samplesheet is empty", self.logger.log_msgs["ss_empty"]
+                "File is empty",
+                self.logger.log_msgs["file_empty"] % file,
             )
         else:
-            self.logger.info(self.logger.log_msgs["ss_not_empty"])
+            self.logger.info(self.logger.log_msgs["file_not_empty"] % file)
             return True
 
     def get_data_section(self) -> None:
@@ -513,6 +526,18 @@ class SamplesheetCheck:
             self.tso = True
         else:
             self.logger.info(self.logger.log_msgs["not_tso_run"])
+
+    def check_okd(self) -> Union[bool, None]:
+        """
+        Assigns self.okd as True if OKD run
+            : return None:
+        """
+        if set(self.pannumbers).intersection(set(self.okd_panels)):
+            self.logger.info(self.logger.log_msgs["okd_run"])
+            self.okd = True
+            return True
+        else:
+            self.logger.info(self.logger.log_msgs["not_okd_run"])
 
     def log_summary(self) -> None:
         """
